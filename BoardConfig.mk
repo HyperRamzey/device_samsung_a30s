@@ -19,6 +19,9 @@ BOARD_VENDORIMAGE_PARTITION_SIZE   := 645922816
 TARGET_SEC_FP_REQUEST_TOUCH_EVENT := true
 TARGET_SEC_FP_REQUEST_FORCE_CALIBRATE := true
 
+# Properties
+TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
+
 # Inherit common board flags
 include device/samsung/exynos7885-common/BoardConfigCommon.mk
 
