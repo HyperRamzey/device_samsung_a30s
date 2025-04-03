@@ -13,3 +13,6 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-4096-dalvik-heap.mk)
 # Display resolution
 TARGET_SCREEN_HEIGHT := 2280
 TARGET_SCREEN_WIDTH := 1080
+
+# Soong namespaces
+PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
