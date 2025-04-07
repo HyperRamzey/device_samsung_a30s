@@ -1,8 +1,9 @@
-# All blobs below are extracted from samsung/a30sub/a30s:11/RP1A.200720.012/A307GUBS4CUJ1:user/release-keys, unless otherwise stated.
+# All blobs below are extracted from samsung/a30sxx/a30s:11/RP1A.200720.012/A307FNXXU4CWH7:user/release-keys, unless otherwise stated.
 
 # Audio
 vendor/lib/hw/audio.primary.exynos7904.so
 vendor/lib/vndk/libaudioroute.so
+vendor/lib/lib_SamsungRec_07010.so
 
 # Dap
 vendor/etc/dolby/dax-default.xml
@@ -44,14 +45,15 @@ vendor/firmware/setfile_hi1631.bin
 vendor/firmware/setfile_imx576.bin
 
 # NFC firmware
-vendor/etc/nfc/sec_s3nrn81_rfreg.bin
-vendor/firmware/nfc/sec_s3nrn81_firmware.bin
+vendor/etc/nfc/sec_s3nrn74_hwreg.bin
+vendor/etc/nfc/sec_s3nrn74_swreg.bin
+vendor/firmware/nfc/sec_s3nrn74_firmware.bin
+
+# NFC config
+vendor/etc/libnfc-sec-vendor.conf
 
 # Sensors
-vendor/etc/yas_set.cfg
 vendor/lib64/hw/sensors.universal7904.so
-vendor/lib64/libsensorlistener.so
-vendor/lib64/libyasalgo.so
 
 # Fingerprint
 vendor/lib64/libbauthserver.so
@@ -70,8 +72,8 @@ vendor/lib/hw/thermal.universal7904.so
 vendor/lib64/hw/thermal.universal7904.so
 
 # Memtrack
-vendor/lib/hw/memtrack.universal7904.so
-vendor/lib64/hw/memtrack.universal7904.so
+vendor/lib/hw/memtrack.exynos7904.so
+vendor/lib64/hw/memtrack.exynos7904.so
 
 # HWC
 vendor/lib/hw/hwcomposer.exynos7904.so
@@ -107,4 +109,4 @@ vendor/etc/wifi/mx140_wlan_t.hcf
 vendor/etc/wifi/platform.txt
 
 # TEE firmware
-vendor/tee/00000000-0000-0000-0000-46494e474502
+vendor/tee/00000000-0000-0000-0000-46494e474552
