@@ -1,6 +1,10 @@
 # Copyright (C) 2025 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 
+# Target Info
+TARGET_SOC := exynos7904
+TARGET_DEVICE := a30s
+
 # Inherit common device configuration
 $(call inherit-product, device/samsung/exynos7885-common/exynos7885-common.mk)
 
