@@ -75,14 +75,6 @@ vendor/lib64/hw/thermal.universal7904.so:vendor/lib64/hw/thermal.exynos7904.so
 vendor/lib/hw/memtrack.exynos7904.so
 vendor/lib64/hw/memtrack.exynos7904.so
 
-# HWC
-vendor/lib/hw/hwcomposer.exynos7904.so
-vendor/lib64/hw/hwcomposer.exynos7904.so
-
-# Gralloc
-vendor/lib/hw/gralloc.exynos7904.so
-vendor/lib64/hw/gralloc.exynos7904.so
-
 # GPS
 vendor/bin/hw/gpsd
 vendor/bin/hw/vendor.samsung.hardware.gnss@2.0-service
