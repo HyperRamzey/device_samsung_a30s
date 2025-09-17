@@ -13,10 +13,10 @@ $(call inherit-product, device/samsung/a30s/device.mk)
 # Inherit LineageOS common device config
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
-BUILD_FINGERPRINT := "samsung/a30sub/a30s:11/RP1A.200720.012/A307GUBS4CUJ1:user/release-keys"
+BUILD_FINGERPRINT := "samsung/a30sxx/a30s:11/RP1A.200720.012/A307FNXXU4CWH7:user/release-keys"
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
-   BuildDesc="a30sub-user 11 RP1A.200720.012 A307GUBS4CUJ1 release-keys"
+   BuildDesc="a30sxx-user 11 RP1A.200720.012 A307FNXXU4CWH7 release-keys"
 
 # Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := a30s
