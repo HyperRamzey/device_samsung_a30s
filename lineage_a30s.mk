@@ -7,11 +7,11 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 
-# Inherit device configuration
-$(call inherit-product, device/samsung/a30s/device.mk)
-
 # Inherit LineageOS common device config
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
+
+# Inherit device configuration
+$(call inherit-product, device/samsung/a30s/device.mk)
 
 # Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := a30s

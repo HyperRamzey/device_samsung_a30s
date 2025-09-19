@@ -1,14 +1,17 @@
 DEVICE_PATH := device/samsung/a30s
 
+# Inherit common board flags
+include device/samsung/exynos7885-common/BoardConfigCommon.mk
+
 # Asserts
 TARGET_OTA_ASSERT_DEVICE := a30s,a30sdd
+
+# Display
+TARGET_SCREEN_DENSITY := 280
 
 # Kernel
 TARGET_KERNEL_CONFIG := exynos7885_defconfig
 TARGET_KERNEL_CONFIG += a30s.config
-
-# Display
-TARGET_SCREEN_DENSITY := 280
 
 # Partitions
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 55574528
@@ -18,9 +21,6 @@ BOARD_VENDORIMAGE_PARTITION_SIZE   := 645922816
 
 # Properties
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
-
-# Inherit common board flags
-include device/samsung/exynos7885-common/BoardConfigCommon.mk
 
 # SPL
 VENDOR_SECURITY_PATCH := 2021-11-01
