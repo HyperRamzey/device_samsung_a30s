@@ -8,10 +8,10 @@ vendor/etc/dolby/dax-default.xml
 vendor/lib/soundfx/libswdap.so
 
 # Camera
-vendor/lib/hw/camera.exynos7904.so
+vendor/lib/hw/camera.exynos7904.so;DISABLE_CHECKELF
 vendor/lib/libOpenCv.camera.samsung.so
 vendor/lib/libSEF.quram.so
-vendor/lib/libexynoscamera3.so
+vendor/lib/libexynoscamera3.so;DISABLE_CHECKELF
 vendor/lib/libmpbase.so
 vendor/lib/libsaiv_BeautySolutionVideo.so
 vendor/lib/libskhynix_q2b_shared.so
@@ -19,10 +19,10 @@ vendor/lib/libuniapi.so
 vendor/lib/libuniplugin.so
 vendor/lib/libvideobeauty.arcsoft.so
 vendor/lib/libvideobeauty_interface.so
-vendor/lib64/hw/camera.exynos7904.so
+vendor/lib64/hw/camera.exynos7904.so;DISABLE_CHECKELF
 vendor/lib64/libOpenCv.camera.samsung.so
 vendor/lib64/libSEF.quram.so
-vendor/lib64/libexynoscamera3.so
+vendor/lib64/libexynoscamera3.so;DISABLE_CHECKELF
 vendor/lib64/libmpbase.so
 vendor/lib64/libsaiv_BeautySolutionVideo.so
 vendor/lib64/libskhynix_q2b_shared.so
