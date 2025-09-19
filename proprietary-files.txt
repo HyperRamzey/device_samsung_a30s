@@ -66,14 +66,6 @@ vendor/lib64/libsynaFpSensorTestNwd.so
 vendor/lib/hw/gatekeeper.exynos7904.so
 vendor/lib64/hw/gatekeeper.exynos7904.so
 
-# GPS
-vendor/bin/hw/gpsd
-vendor/bin/hw/vendor.samsung.hardware.gnss@2.0-service
-vendor/etc/init/vendor.samsung.hardware.gnss@2.0-service.rc
-vendor/lib64/hw/android.hardware.gnss@2.1-impl.so;FIX_SONAME
-vendor/lib64/hw/vendor.samsung.hardware.gnss@2.0-impl.so;FIX_SONAME
-vendor/lib64/libwrappergps.so
-
 # Media
 vendor/etc/mixer_gains.xml
 vendor/etc/mixer_paths.xml
