@@ -1,5 +1,10 @@
 DEVICE_PATH := device/samsung/a30s
 
+# Fingerprint
+$(call soong_config_set,surfaceflinger,udfps_lib,//hardware/samsung/fingerprint:libudfps_extension.samsung)
+$(call soong_config_set,samsungUdfpsVars,dim_layer_zorder,0x20000001u)
+BOARD_UDFPS_DIM_LAYER_ZORDER := 0x20000001u
+
 # Inherit common board flags
 include device/samsung/exynos7885-common/BoardConfigCommon.mk
 
