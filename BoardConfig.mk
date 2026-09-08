@@ -16,6 +16,8 @@ TARGET_SCREEN_DENSITY := 280
 
 # Kernel
 TARGET_KERNEL_CONFIG := full/exynos7885-a30s_defconfig
+# Use prebuilt clang for host tools (Debian gcc-14 errors on implicit decls in 4.4 vendor scripts)
+TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=clang HOSTCXX=clang++
 
 # Partitions
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 55574528
