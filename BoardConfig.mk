@@ -15,6 +15,12 @@ TARGET_OTA_ASSERT_DEVICE := a30s,a30sdd
 TARGET_SCREEN_DENSITY := 280
 
 # Kernel
+# Kernel cmdline — REQUIRED: first_stage init locates fstab.${hardware} and
+# init.${hardware}.rc via androidboot.hardware. Known-good TWRP/OrangeFox and stock
+# images all carry this; our mkbootimg images had an empty cmdline field (bootloop).
+BOARD_KERNEL_CMDLINE := androidboot.hardware=exynos7904
+BOARD_MKBOOTIMG_ARGS += --cmdline "$(BOARD_KERNEL_CMDLINE)"
+
 TARGET_KERNEL_CONFIG := full/exynos7885-a30s_defconfig
 # Use prebuilt clang for host tools (Debian gcc-14 errors on implicit decls in 4.4 vendor scripts)
 TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=clang HOSTCXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-
