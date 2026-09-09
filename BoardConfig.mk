@@ -36,3 +36,9 @@ TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
 
 # SPL
 VENDOR_SECURITY_PATCH := 2021-11-01
+
+# Touch HAL: a30s firmware supports glove_mode AND hover_enable (stylus),
+# so the HAL registers IGloveMode + IStylusMode; declare both (the common
+# else-branch manifest only declares IGloveMode, which makes A16
+# servicemanager reject the IStylusMode registration and crash-loops the HAL).
+DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest_touch_a30s.xml
