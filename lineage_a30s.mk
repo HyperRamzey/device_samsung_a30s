@@ -7,6 +7,13 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 
+# Bring-up: keep adb usable for diagnosis. Lineage's common.mk sets
+# ro.adb.secure=1 + PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG := true when
+# WITH_ADB_INSECURE is unset (evaluated at inherit time), which yields
+# ro.debuggable=0 even in userdebug builds and authenticated adb (impossible
+# to accept headless while the boot hangs). Set BEFORE the lineage inherit.
+WITH_ADB_INSECURE := true
+
 # Inherit LineageOS common device config
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
