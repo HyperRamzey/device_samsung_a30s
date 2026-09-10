@@ -1,3 +1,8 @@
+# A16 first_stage GetFstabPath: Samsung SAR boot expects the fstab at
+# /system/etc/fstab.exynos7904 (androidboot.hardware=exynos7904).
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/fstab.exynos7904:$(TARGET_COPY_OUT_SYSTEM)/etc/fstab.exynos7904
+
 # Copyright (C) 2025 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 
