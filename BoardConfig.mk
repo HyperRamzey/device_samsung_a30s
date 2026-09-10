@@ -41,4 +41,8 @@ VENDOR_SECURITY_PATCH := 2021-11-01
 # so the HAL registers IGloveMode + IStylusMode; declare both (the common
 # else-branch manifest only declares IGloveMode, which makes A16
 # servicemanager reject the IStylusMode registration and crash-loops the HAL).
+# Replace the common else-branch manifest_touch.xml (IGloveMode-only) with the
+# a30s-specific one (IGloveMode + IStylusMode + ITouchscreenGesture) - the firmware
+# cmd_list supports all three and A16 servicemanager rejects undeclared interfaces.
+DEVICE_MANIFEST_FILE := $(filter-out $(COMMON_PATH)/manifest_touch.xml,$(DEVICE_MANIFEST_FILE))
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest_touch_a30s.xml
