@@ -37,3 +37,9 @@ DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 
+
+# Charger-mode: power-key hold in charger mode must continue full boot
+# (sys.boot_from_charger_mode=1) instead of reboot(RB_AUTOBOOT), which
+# loops forever when the bootloader re-enters charger mode (a30s PMIC
+# PWRON latch after freezes). init.rc handles the property.
+PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
