@@ -27,6 +27,13 @@ PRODUCT_MODEL := SM-A307F
 PRODUCT_BRAND := samsung
 PRODUCT_MANUFACTURER := samsung
 
+# Bring-up: ship the build host's adb public key as a product adb_keys file
+# (/product/etc/security/adb_keys, world-readable). adbd's IteratePublicKeys
+# fallback reads /adb_keys (symlink to this) when the framework auth broker is
+# unavailable (system_server hung/crashed during bring-up), authorizing this
+# host without the RSA confirmation dialog.
+PRODUCT_ADB_KEYS := device/samsung/exynos7885-common/adb/adb_keys
+
 PRODUCT_GMS_CLIENTID_BASE := android-samsung
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
