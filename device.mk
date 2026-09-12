@@ -43,3 +43,9 @@ PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 # loops forever when the bootloader re-enters charger mode (a30s PMIC
 # PWRON latch after freezes). init.rc handles the property.
 PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
+
+# Samsung SEH radio manager: binds vendor.samsung.hardware.radio ISehRadio
+# (HIDL 2.x) + sends FW_READY. Without it Samsung rild exits (clean) every
+# ~30s ("Request processing is disabled" -> silent-reset cycle), re-booting
+# the CP via cbd each time and blipping telephony/STK.
+PRODUCT_PACKAGES += sehradiomanager
