@@ -12,3 +12,10 @@
 on post-fs-data
     mkdir /data/dolby_f5 0755 root root
     exec - root root -- /system/bin/sh /system/bin/dolby_f5.sh mount
+
+# boot_completed backstop: system rc triggers may register after early-boot
+# triggers already fired (proven: post-fs-data block never ran on 0915
+# release). Property triggers from /system/etc/init DO fire (audioserver.rc
+# proves it). Script is idempotent: second run is a no-op.
+on property:sys.boot_completed=1
+    exec - root root -- /system/bin/sh /system/bin/dolby_f5.sh mount

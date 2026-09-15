@@ -60,9 +60,11 @@ mode_mount() {
         return 0
     fi
     ensure_stage || { log "mount" "STAGE FAILED, aborting"; return 1; }
+    changed=0
     if ! is_mounted "$OVL_LIB_DST"; then
         if mount -t overlay overlay -o "ro,lowerdir=$STG/lib:/vendor/lib" "$OVL_LIB_DST" 2>/dev/null; then
             log "mount" "OVERLAY $OVL_LIB_DST (lowerdir=$STG/lib)"
+            changed=1
         else
             log "mount" "OVERLAY FAIL $OVL_LIB_DST"
         fi
@@ -70,6 +72,7 @@ mode_mount() {
     if ! is_mounted "$XML_DST"; then
         if mount --bind "$STG/etc/dolby/dax-default.xml" "$XML_DST" 2>/dev/null; then
             log "mount" "BOUND $XML_DST"
+            changed=1
         else
             log "mount" "BIND FAIL $XML_DST"
         fi
@@ -77,11 +80,26 @@ mode_mount() {
     if ! is_mounted "$BIN_DST"; then
         if mount --bind "$STG/firmware/dax_param.bin" "$BIN_DST" 2>/dev/null; then
             log "mount" "BOUND $BIN_DST"
+            changed=1
         else
             log "mount" "BIND FAIL $BIN_DST"
         fi
     fi
-    log "mount" "done (effect control = stock QS tile)"
+    # If mounts landed while audio is already running (late trigger timing),
+    # restart the stack so the HAL picks up the F5 blobs. Pre-HAL timing
+    # (post-fs-data) skips this: nothing is running yet.
+    if [ "$changed" = "1" ]; then
+        if [ "$(getprop init.svc.audioserver 2>/dev/null)" = "running" ]; then
+            log "mount" "audio running, restarting stack to pick up F5 blobs"
+            setprop ctl.restart vendor.audio-hal 2>/dev/null
+            sleep 1
+            setprop ctl.restart audioserver 2>/dev/null
+        else
+            log "mount" "done pre-audio-start, no restart needed"
+        fi
+    else
+        log "mount" "already mounted, no-op"
+    fi
 }
 
 mode_umount() {
