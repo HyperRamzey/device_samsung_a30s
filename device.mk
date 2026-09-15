@@ -49,3 +49,9 @@ PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
 # ~30s ("Request processing is disabled" -> silent-reset cycle), re-booting
 # the CP via cbd each time and blipping telephony/STK.
 PRODUCT_PACKAGES += sehradiomanager
+
+# Dual-mono earpiece helper (in-tree): stock mixer_paths.xml + EP enable at
+# unity in media-speaker. Replaces the vendor blob copy (removed from
+# proprietary-files.txt / a30s-vendor.mk) so the tree is the single source.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/audio/mixer_paths.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths.xml

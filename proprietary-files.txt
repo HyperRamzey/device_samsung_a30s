@@ -68,7 +68,6 @@ vendor/lib64/hw/gatekeeper.exynos7904.so
 
 # Media
 vendor/etc/mixer_gains.xml
-vendor/etc/mixer_paths.xml
 
 # Wifi
 vendor/etc/wifi/hydra_config.sdb
