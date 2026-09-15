@@ -55,3 +55,9 @@ PRODUCT_PACKAGES += sehradiomanager
 # proprietary-files.txt / a30s-vendor.mk) so the tree is the single source.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/mixer_paths.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths.xml
+
+# SkiaVK renderer + Camera HAL3 (merged from Skia_Vulkan_MOD). The module QCOM pile is placebo on Exynos and is skipped, as is spkr_prot disable (removes speaker protection).
+PRODUCT_PROPERTY_OVERRIDES += \
+    debug.hwui.renderer=skiavk \
+    persist.camera.HAL3.enabled=1 \
+    persist.vendor.camera.HAL3.enabled=1
