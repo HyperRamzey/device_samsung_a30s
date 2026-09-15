@@ -1,0 +1,14 @@
+# init.dolby_f5.rc - Fold5 DAP stack (in-tree).
+# Mounts at post-fs-data, BEFORE the audio HAL starts, so no service restart
+# is ever needed. Effect on/off stays with the stock QS tile
+# (org.lineageos.dap), which toggles the DAP AudioEffect live, like stock.
+# Opt out: touch /data/dolby_f5/disabled + reboot (stock stack stays).
+#
+# NOTE: uses exec (init's own context), NOT a service block: services need a
+# seclabel-defined domain transition and init rejects shell_exec without one
+# ("has incorrect label or no domain transition" - proven on 2026-09-15 boot).
+# exec runs as init (u:r:init:s0, root) which can mount/chcon freely.
+
+on post-fs-data
+    mkdir /data/dolby_f5 0755 root root
+    exec - root root -- /system/bin/sh /system/bin/dolby_f5.sh mount

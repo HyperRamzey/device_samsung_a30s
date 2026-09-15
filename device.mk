@@ -49,3 +49,16 @@ PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
 # ~30s ("Request processing is disabled" -> silent-reset cycle), re-booting
 # the CP via cbd each time and blipping telephony/STK.
 PRODUCT_PACKAGES += sehradiomanager
+
+# Fold5 Dolby DAP stack (in-tree, toggle via persist.sys.dolby_f5).
+# Blobs ship on /system/dolby_f5 (flashed); init bind-mounts/overlays them
+# over /vendor paths when enabled. No vendor.img changes, no module.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/dolby_f5/blobs/lib/soundfx/libswdap.so:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/lib/soundfx/libswdap.so \
+    $(LOCAL_PATH)/dolby_f5/blobs/lib/libprofileparamstorage.so:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/lib/libprofileparamstorage.so \
+    $(LOCAL_PATH)/dolby_f5/blobs/lib/libspatializerparamstorage.so:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/lib/libspatializerparamstorage.so \
+    $(LOCAL_PATH)/dolby_f5/blobs/lib/libsecaudiocoreutils.so:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/lib/libsecaudiocoreutils.so \
+    $(LOCAL_PATH)/dolby_f5/blobs/etc/dolby/dax-default.xml:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/etc/dolby/dax-default.xml \
+    $(LOCAL_PATH)/dolby_f5/blobs/firmware/dax_param.bin:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/firmware/dax_param.bin \
+    $(LOCAL_PATH)/dolby_f5/dolby_f5.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/dolby_f5.sh \
+    $(LOCAL_PATH)/dolby_f5/init.dolby_f5.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/dolby_f5.rc
