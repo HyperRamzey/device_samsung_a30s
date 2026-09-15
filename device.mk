@@ -62,3 +62,9 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/dolby_f5/blobs/firmware/dax_param.bin:$(TARGET_COPY_OUT_SYSTEM)/dolby_f5/firmware/dax_param.bin \
     $(LOCAL_PATH)/dolby_f5/dolby_f5.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/dolby_f5.sh \
     $(LOCAL_PATH)/dolby_f5/init.dolby_f5.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/dolby_f5.rc
+
+# Dual-mono earpiece helper (in-tree): stock mixer_paths.xml + EP enable at
+# unity in media-speaker. Replaces the vendor blob copy (removed from
+# proprietary-files.txt / a30s-vendor.mk) so the tree is the single source.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/audio/mixer_paths.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths.xml
