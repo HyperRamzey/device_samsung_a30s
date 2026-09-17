@@ -284,6 +284,10 @@
 		<path name="media-handset" />
 	</path>
 
+	<!-- Shared speaker base for every speaker route (media, ringtone, calls/VoIP,
+	     BT-SCO, loopback, echo reference). Earpiece helper at unity 0 dB.
+	     EP has NO smart-PA protection: do NOT raise Earphone Volume without
+	     ear-testing. -->
 	<path name="speaker-dualmono">
 		<path name="route-spkamp-playback" />
 		<path name="dev-speaker" />
@@ -291,6 +295,17 @@
 		<ctl name="Earphone Volume" value="0" />
 	</path>
 
+	<!-- TRUE STEREO OVER TWO SPEAKERS - MEDIA OUTPUT ONLY.
+	     The codec downmixes to mono by default ("Mono Mix" is enabled in the
+	     initial controls above), so to drive the earpiece and the main speaker
+	     as separate channels: disable the mono downmix, keep the left channel
+	     for the earpiece (top) and the right channel for the smart-PA speaker
+	     (bottom) through the LR data swap. Verified by listening with
+	     single-channel sources: L-only -> top, R-only -> bottom, both active.
+	     Only media playback reaches this path; ringtone, calls/VoIP, BT-SCO,
+	     loopback and echo reference compose speaker-dualmono directly and are
+	     untouched. The three controls are also given explicit reset values in
+	     the initial section so audio_route resets them when the path goes away. -->
 	<path name="media-speaker">
 		<path name="speaker-dualmono" />
 		<ctl name="MonoMix Mode" value="L" />
