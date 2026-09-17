@@ -83,6 +83,9 @@
 
 	<ctl name="HP HP On" value="0" />
 	<ctl name="EP EP On" value="0" />
+	<ctl name="MonoMix Mode" value="Disable" />
+	<ctl name="LR_DATA_SW(1:swap_0:normal)" value="0" />
+	<ctl name="Mono Mix(1:en_0:dis)" value="1" />
 
 	<ctl name="MIC1 MIC1 On" value="0" />
 	<ctl name="MIC2 MIC2 On" value="0" />
@@ -281,15 +284,18 @@
 		<path name="media-handset" />
 	</path>
 
-	<path name="media-speaker">
+	<path name="speaker-dualmono">
 		<path name="route-spkamp-playback" />
 		<path name="dev-speaker" />
-		<!-- DUAL-MONO (dualmono module): earpiece helper at unity 0dB.
-		     EP has NO smart-PA protection: do NOT raise Earphone Volume
-		     without ear-testing. Affects ringtone-speaker + speakerphone
-		     too (they compose media-speaker). -->
 		<ctl name="EP EP On" value="1" />
 		<ctl name="Earphone Volume" value="0" />
+	</path>
+
+	<path name="media-speaker">
+		<path name="speaker-dualmono" />
+		<ctl name="MonoMix Mode" value="L" />
+		<ctl name="Mono Mix(1:en_0:dis)" value="0" />
+		<ctl name="LR_DATA_SW(1:swap_0:normal)" value="1" />
 	</path>
 
 	<path name="media-headset">
@@ -322,7 +328,7 @@
 
 	<path name="media-speaker-bt-sco-headset">
 		<path name="media-bt-sco-headset" />
-		<path name="media-speaker" />
+		<path name="speaker-dualmono" />
 	</path>
 
 	<!-- Ringtone playback -->
@@ -331,7 +337,7 @@
 	</path>
 
 	<path name="ringtone-speaker">
-		<path name="media-speaker" />
+		<path name="speaker-dualmono" />
 	</path>
 
 	<path name="ringtone-headset">
@@ -356,7 +362,7 @@
 	</path>
 
 	<path name="communication-speaker">
-		<path name="media-speaker" />
+		<path name="speaker-dualmono" />
 	</path>
 
 	<path name="communication-headset">
@@ -731,7 +737,7 @@
 	</path>
 
 	<path name="realtimeloopback-speaker">
-		<path name="media-speaker" />
+		<path name="speaker-dualmono" />
 	</path>
 
 	<path name="realtimeloopback-headset">
@@ -774,7 +780,7 @@
 	</path>
 
 	<path name="echo_test-speaker">
-		<path name="media-speaker" />
+		<path name="speaker-dualmono" />
 	</path>
 
 	<!-- call forwarding output -->
