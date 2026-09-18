@@ -23,7 +23,9 @@ BOARD_MKBOOTIMG_ARGS += --cmdline "$(BOARD_KERNEL_CMDLINE)"
 
 TARGET_KERNEL_CONFIG := full/exynos7885-a30s_defconfig
 # Use prebuilt clang for host tools (Debian gcc-14 errors on implicit decls in 4.4 vendor scripts)
-TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=clang HOSTCXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-
+# a30s: Neutron Clang 24 builds the kernel (proven trial-3); host tools stay on stock r563880c (Neutron segfaults host binaries vs glibc-2.17 sysroot)
+TARGET_KERNEL_CLANG_PATH := /root/toolchains
+TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang HOSTCXX=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- STRIP=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/llvm-strip
 
 # Partitions
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 55574528
