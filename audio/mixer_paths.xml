@@ -86,6 +86,7 @@
 	<ctl name="MonoMix Mode" value="Disable" />
 	<ctl name="LR_DATA_SW(1:swap_0:normal)" value="0" />
 	<ctl name="Mono Mix(1:en_0:dis)" value="1" />
+	<ctl name="Earphone Volume" value="0" />
 
 	<ctl name="MIC1 MIC1 On" value="0" />
 	<ctl name="MIC2 MIC2 On" value="0" />
@@ -287,7 +288,8 @@
 	<!-- Shared speaker base for every speaker route (media, ringtone, calls/VoIP,
 	     BT-SCO, loopback, echo reference). Earpiece helper at unity 0 dB.
 	     EP has NO smart-PA protection: do NOT raise Earphone Volume without
-	     ear-testing. -->
+	     ear-testing. User ear test 2026-09-18: 8 is the maximum safe loudness;
+	     every path that audibly drives the earpiece sets exactly 8. -->
 	<path name="speaker-dualmono">
 		<path name="route-spkamp-playback" />
 		<path name="dev-speaker" />
@@ -295,19 +297,24 @@
 		<ctl name="Earphone Volume" value="0" />
 	</path>
 
-	<!-- TRUE STEREO OVER TWO SPEAKERS - MEDIA OUTPUT ONLY.
-	     The codec downmixes to mono by default ("Mono Mix" is enabled in the
-	     initial controls above), so to drive the earpiece and the main speaker
-	     as separate channels: disable the mono downmix, keep the left channel
-	     for the earpiece (top) and the right channel for the smart-PA speaker
-	     (bottom) through the LR data swap. Verified by listening with
-	     single-channel sources: L-only -> top, R-only -> bottom, both active.
-	     Only media playback reaches this path; ringtone, calls/VoIP, BT-SCO,
-	     loopback and echo reference compose speaker-dualmono directly and are
-	     untouched. The three controls are also given explicit reset values in
-	     the initial section so audio_route resets them when the path goes away. -->
+	<!-- TRUE STEREO OVER TWO SPEAKERS - media playback (and notification
+	     sounds, which ride the media usecase). The codec downmixes to mono by
+	     default ("Mono Mix" is enabled in the initial controls above), so to
+	     drive the earpiece and the main speaker as separate channels: disable
+	     the mono downmix, keep the left channel for the earpiece (top) and the
+	     right channel for the smart-PA speaker (bottom) through the LR data
+	     swap. Verified by listening with single-channel sources: L-only ->
+	     top, R-only -> bottom, both active. Earphone Volume 8 = user-verified
+	     maximum safe loudness for the unprotected EP (user ear test
+	     2026-09-18) - never raise above 8. The main speaker in this split is
+	     toned down ~10% in gain-media-speaker (mixer_gains.xml) to balance
+	     L/R. Ringtones compose this exact path too; calls keep earpiece-only
+	     on the handset and get EP+main (mono, same capped 8) on speaker. The
+	     split controls plus Earphone Volume have explicit reset values in the
+	     initial section so audio_route puts them back when the path ends. -->
 	<path name="media-speaker">
 		<path name="speaker-dualmono" />
+		<ctl name="Earphone Volume" value="8" />
 		<ctl name="MonoMix Mode" value="L" />
 		<ctl name="Mono Mix(1:en_0:dis)" value="0" />
 		<ctl name="LR_DATA_SW(1:swap_0:normal)" value="1" />
@@ -351,8 +358,10 @@
 		<path name="media-handset" />
 	</path>
 
+	<!-- Ringtones and notification alert sounds play the same L|R split as
+	     media (user request 2026-09-18). -->
 	<path name="ringtone-speaker">
-		<path name="speaker-dualmono" />
+		<path name="media-speaker" />
 	</path>
 
 	<path name="ringtone-headset">
@@ -376,8 +385,11 @@
 		<path name="media-handset" />
 	</path>
 
+	<!-- Calls on speaker: earpiece + main together (mono duplicate), EP at
+	     the capped safe 8. Handset calls stay earpiece-only. -->
 	<path name="communication-speaker">
 		<path name="speaker-dualmono" />
+		<ctl name="Earphone Volume" value="8" />
 	</path>
 
 	<path name="communication-headset">
@@ -557,6 +569,8 @@
 		<path name="route-playback" />
 		<path name="route-spkamp-playback" />
 		<path name="dev-speaker" />
+		<ctl name="EP EP On" value="1" />
+		<ctl name="Earphone Volume" value="8" />
 		<ctl name="ABOX Sound Type" value="SPEAKER" />
 	</path>
 
