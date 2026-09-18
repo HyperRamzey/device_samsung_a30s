@@ -61,3 +61,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
     debug.hwui.renderer=skiavk \
     persist.camera.HAL3.enabled=1 \
     persist.vendor.camera.HAL3.enabled=1
+
+# LMK tuning for 2.8GB RAM + zram (OOM forensics 2026-09-18, Morphe SIGKILL):
+# kill heaviest cached task first (fewer kills per MB freed), low-RAM swap
+# floor, lmkd debug for the next forensics round (userdebug only).
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.lmk.kill_heaviest_task=true \
+    ro.lmk.swap_free_low_percentage=10 \
+    ro.lmk.debug=true
