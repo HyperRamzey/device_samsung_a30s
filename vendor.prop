@@ -2,6 +2,11 @@
 bluetooth.device.default_name=Galaxy A30s
 
 # Fingerprint
-# ET715 (etspi,et7xx) on SPI1 is a rear-mounted capacitive pad; it reports its own
-# DRDY interrupt, so it must not be described as an in-display optical sensor.
-ro.vendor.fingerprint.type=rear
+# ET715 (etspi,et7xx) on SPI1, model A307 — Egis optical under-display sensor.
+# A30s (SM-A307) ships in-display optical, NOT rear capacitive (A30 is rear).
+# sensor_location 360|1237|119 = display hotspot (720x1560 panel, center-x, lower-third).
+# force_calibrate + request_touch_event are required for the optical enroll/illumination path.
+ro.vendor.fingerprint.type=udfps_optical
+ro.vendor.fingerprint.sensor_location=360|1237|119
+ro.vendor.fingerprint.force_calibrate=true
+ro.vendor.fingerprint.request_touch_event=true
