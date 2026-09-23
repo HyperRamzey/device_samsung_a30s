@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A30s ET715 optical needs GREEN illumination (DT etspi-rb 00FF00).
+     AOSP/Lineage default is WHITE, rejected every frame (BAuth BAD_QUALITY 39).
+     a51 (same sensor family) uses #00ff50. -->
+<resources>
+    <color name="config_udfpsColor">#00ff50</color>
+</resources>
