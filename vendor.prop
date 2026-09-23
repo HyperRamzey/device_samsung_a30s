@@ -4,9 +4,12 @@ bluetooth.device.default_name=Galaxy A30s
 # Fingerprint
 # ET715 (etspi,et7xx) on SPI1, model A307 — Egis optical under-display sensor.
 # A30s (SM-A307) ships in-display optical, NOT rear capacitive (A30 is rear).
-# sensor_location 360|1237|119 = display hotspot (720x1560 panel, center-x, lower-third).
-# force_calibrate + request_touch_event are required for the optical enroll/illumination path.
+# sensor_location 360|1350|119 = user-verified display hotspot against stock
+# (LuK1337's 360|1237|119 read too high; 1450 read too low; 1350 confirmed).
+# force_calibrate + request_touch_event are required for the optical enroll path.
+# Illumination color is green via overlay config_udfpsColor (#00ff50), matching
+# DT etspi-rb 00FF00 — AOSP white is rejected by the trustlet (BAD_QUALITY 39).
 ro.vendor.fingerprint.type=udfps_optical
-ro.vendor.fingerprint.sensor_location=360|1237|119
+ro.vendor.fingerprint.sensor_location=360|1350|119
 ro.vendor.fingerprint.force_calibrate=true
 ro.vendor.fingerprint.request_touch_event=true
