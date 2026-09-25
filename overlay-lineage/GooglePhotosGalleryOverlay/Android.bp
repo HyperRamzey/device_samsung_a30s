@@ -1,0 +1,5 @@
+runtime_resource_overlay {
+    name: "GooglePhotosGalleryOverlay",
+    product_specific: true,
+    manifest: "AndroidManifest.xml",
+}

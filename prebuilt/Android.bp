@@ -1,0 +1,21 @@
+android_app_import {
+    name: "AGC",
+    apk: "AGC.apk",
+    presigned: true,
+    preprocessed: true,
+    enforce_uses_libs: false,
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+android_app_import {
+    name: "GooglePhotos",
+    apk: "GooglePhotos.apk",
+    presigned: true,
+    preprocessed: true,
+    enforce_uses_libs: false,
+    dex_preopt: {
+        enabled: false,
+    },
+}

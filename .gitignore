@@ -1,0 +1,4 @@
+
+# 738MB of GPhotos/AGC APKs: exceed GitHub 100MB/file limit, cannot be pushed.
+# Preserved at /root/backup/a30s_gphotos_prebuilt_20260925.tar ; Android.bp stays tracked.
+prebuilt/*.apk
