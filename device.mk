@@ -44,6 +44,18 @@ PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 # PWRON latch after freezes). init.rc handles the property.
 PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
 
+# bpfloader version gate. bpfloader.rs:428 honours ro.bpf.kver_override (added
+# by commit 6c5f4f8, 'bpfloader: Allow overriding kernel version'). On this 4.4
+# kernel the loader otherwise version-gates every map and program out, loads
+# nothing, and never sets bpf.progs_loaded - so lmkd/netd log 'BPF-less kernel?'
+# and report empty network stats. The kernel already backports what the traffic
+# programs need: bpf_obj_pin/bpf_obj_get, cgroup+socket+net_cls BPF, and
+# array/hashtable/percpu/lpm maps (bpftool feature probe: 'bpf() syscall for
+# unprivileged users is enabled'). 5.4.0 is the highest honest claim - the
+# backport has no ringbuf (5.8), local_storage (5.7) or queue_stack_maps (5.9),
+# so claiming 5.10 would make bpfloader request maps bpf() cannot create.
+PRODUCT_VENDOR_PROPERTIES += ro.bpf.kver_override=5.4.0
+
 # Samsung SEH radio manager: binds vendor.samsung.hardware.radio ISehRadio
 # (HIDL 2.x) + sends FW_READY. Without it Samsung rild exits (clean) every
 # ~30s ("Request processing is disabled" -> silent-reset cycle), re-booting
