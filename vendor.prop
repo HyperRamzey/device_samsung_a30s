@@ -6,10 +6,21 @@ bluetooth.device.default_name=Galaxy A30s
 # A30s (SM-A307) ships in-display optical, NOT rear capacitive (A30 is rear).
 # sensor_location 360|1350|119 = user-verified display hotspot against stock
 # (LuK1337's 360|1237|119 read too high; 1450 read too low; 1350 confirmed).
-# force_calibrate + request_touch_event are required for the optical enroll path.
+# request_touch_event is required for the optical enroll path.
 # Illumination color is green via overlay config_udfpsColor (#00ff50), matching
 # DT etspi-rb 00FF00 — AOSP white is rejected by the trustlet (BAD_QUALITY 39).
+#
+# force_calibrate MUST be false. It is read live by getprop on every pointer
+# event, and the AIDL HAL gates the UDFPS pointer callbacks on it:
+#   Session::onPointerDown(): if (force_calibrate && !mCaptureReady) -> "swallowed
+#       (calibration pending)" and request(22,2) is NEVER sent
+#   Session::onPointerUp()  : if (force_calibrate && mCaptureReady) -> request(22,1)
+#       is skipped
+# Session::enroll() also clears mCaptureReady when it is true, which is exactly
+# what puts both handlers on the suppressing branch. With this set, the sensor is
+# never told a finger is present, so no capture can exist and enrollment ends in a
+# HAL-side timeout. Verified on device: with it false, prints[0].count reached 1.
 ro.vendor.fingerprint.type=udfps_optical
 ro.vendor.fingerprint.sensor_location=360|1350|119
-ro.vendor.fingerprint.force_calibrate=true
+ro.vendor.fingerprint.force_calibrate=false
 ro.vendor.fingerprint.request_touch_event=true
