@@ -74,6 +74,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.camera.HAL3.enabled=1 \
     persist.vendor.camera.HAL3.enabled=1
 
+# Telephony: default the preferred network mode to LTE-preferred (9 =
+# RILConstants.NETWORK_MODE_LTE_GSM_WCDMA) for both DSDS slots. Without this the
+# framework falls back to NETWORK_MODE_WCDMA_PREF (3G preferred) and a freshly
+# formatted /data comes up on 3G. See RILConstants.PREFERRED_NETWORK_MODE.
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.telephony.default_network=9,9
+
 # LMK tuning for 2.8GB RAM + zram (OOM forensics 2026-09-18, Morphe SIGKILL):
 # kill heaviest cached task first (fewer kills per MB freed), low-RAM swap
 # floor, lmkd debug for the next forensics round (userdebug only).
