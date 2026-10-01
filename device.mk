@@ -34,6 +34,20 @@ PRODUCT_COPY_FILES += \
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage
 
+# A30sUdfpsEnrollGeometryOverlay must be named explicitly.
+#
+# As an auto-installed Soong module it BUILT and was copied into the staged tree
+# (installed-files.txt line 3028: /system/product/overlay/A30sUdfpsEnrollGeometryOverlay.apk)
+# but never reached the filesystem image: obj/PACKAGING/system_intermediates/file_list.txt
+# - the manifest mkbootfs actually consumes - did not contain it, so every
+# systemimage repacked without it (grep of system.img: 0 occurrences, against a
+# positive control where GooglePhotosGalleryOverlay is 1). Deleting file_list.txt and
+# rebuilding regenerated a byte-identical file, so the manifest is derived from the
+# make/PRODUCT view and not from installed-files.txt; only packages reachable from
+# PRODUCT_PACKAGES or from a DEVICE_PACKAGE_OVERLAYS root land in it, and
+# udfps_settings_overlay/ is neither.
+PRODUCT_PACKAGES += A30sUdfpsEnrollGeometryOverlay
+
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 
