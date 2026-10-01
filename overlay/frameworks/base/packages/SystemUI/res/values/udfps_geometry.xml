@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  UDFPS icon sizing for the A30s (SM-A307F, 720x1560, wm density 280 => 1.75x).
+
+  Two defects are corrected here. Both are measured, not guessed; see
+  BUILD_NOTES.md section 24.
+
+  1) pixel_pitch defaults to -1 in SystemUI/res/values/dimens.xml:2227.
+     UdfpsOverlayInteractor.calculateIconSize() then computes
+        iconSize = (udfps_icon_size / pixel_pitch).toInt() = (6000 / -1) = -6000
+     and DeviceEntryForegroundViewModel computes
+        nativePadding = (sensorWidth - iconSize) / 2 = (238 - -6000)/2 = 3119 px
+     which DeviceEntryIconViewBinder.kt:281 applies as setPadding() to an
+     ImageView whose scaleType is CENTER_CROP (DeviceEntryIconView.kt:293).
+     A CENTER_CROP drawable covering a ~6476 px box inside the 238 px sensor
+     view is what produced the black circle + white band on the lock screen.
+
+     udfps_icon_size is 6000 micrometres; pixel_pitch is micrometres per pixel.
+     6000 / 29.7 = 202 px, i.e. a glyph inset ~18 px inside the 238 px sensor
+     (sensor_location = 360|1350|119). That is the same ~0.85 proportion the
+     reference build uses (pixel_pitch 59.1 on a ~120 px sensor).
+
+  2) udfps_animation_size is 280dp in cr_dimens.xml:25, which at density 1.75
+     is 490 px - 2.06x the sensor. UdfpsAnimation builds a 490x490 px
+     TRANSLUCENT window from it. It currently draws nothing because
+     UDFPS_ANIM_STYLE is 0 and updateAnimationStyle() only installs a
+     background when styleIdx != 0, but the window is still the right size
+     for no reason and would become a 490 px visible ring the moment any
+     animation style is enabled. 136dp x 1.75 = 238 px = the sensor.
+-->
+<resources>
+    <item name="pixel_pitch" format="float" type="dimen">29.7</item>
+    <dimen name="udfps_animation_size">136dp</dimen>
+</resources>

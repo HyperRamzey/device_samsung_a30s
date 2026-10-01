@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  UDFPS enrollment screen geometry for the A30s (SM-A307F).
+
+  The physical sensor is sensor_location = 360|1350|119, i.e. a 238 px square
+  on the 720x1560 panel (radius 119 px).
+
+  WHAT IS WRONG BY DEFAULT, measured from source:
+
+  1) config_udfpsEnrollProgressBar = 280 (res/values/config.xml:787), and
+     UdfpsEnrollView.java:119 does
+
+         mProgressBarRadius = scaleFactor * getInteger(config_udfpsEnrollProgressBar)
+
+     while getPaddingX()/getPaddingY() (lines 226-231) both return that radius,
+     so updateDimensions() (lines 207-208) sizes the whole UdfpsEnrollView to
+
+         sensorBounds.width + 2 * mProgressBarRadius
+
+     At 280 that is 238 + 560 = 798 px on a 720 px wide display - the press
+     target is WIDER THAN THE SCREEN, and the progress ring it draws is 560 px
+     across against a 238 px sensor.
+
+  2) fingerprint_enroll_enrolling_base.xml:41-42 puts the RingProgressBar inside
+     a FillContentLayout sized by fingerprint_progress_bar_max_size = 240dp.
+     At wm density 280 that is 420 px, and RingProgressBar.onMeasure forces
+     setMeasuredDimension(shortSide, shortSide), so the ring is 420x420 px.
+
+  Both are resized here to the real sensor. 136dp x 1.75 = 238 px = the sensor
+  exactly, and 68dp keeps the original 120:240 = 1:2 min:max ratio
+  (68 x 1.75 = 119 px = the sensor radius).
+
+  config_udfpsEnrollProgressBar is an integer used as a radius in px scaled by
+  scaleFactor, NOT a dp dimension, hence <integer> rather than <dimen>. 119 is
+  the sensor radius; if the measured scaleFactor is not 1 this must be
+  119 / scaleFactor (see BUILD_NOTES.md section 25).
+-->
+<resources>
+    <integer name="config_udfpsEnrollProgressBar">119</integer>
+    <dimen name="fingerprint_progress_bar_max_size">136dp</dimen>
+    <dimen name="fingerprint_progress_bar_min_size">68dp</dimen>
+</resources>
