@@ -1,0 +1,27 @@
+// Static runtime resource overlay for the fingerprint enrollment screen.
+//
+// Why an explicit RRO rather than a DEVICE_PACKAGE_OVERLAYS entry:
+// adding a NEW directory under device/samsung/a30s/overlay/frameworks/base/
+// packages/ did not get wired into the Settings resource link. Measured
+// 2026-10-01: Settings.apk was fully rebuilt and still carried
+// config_udfpsEnrollProgressBar=280 and fingerprint_progress_bar_max_size=240dp,
+// while an identically shaped overlay added to the pre-existing SystemUI
+// directory in the same pass did take effect (pixel_pitch=29.7,
+// udfps_animation_size=136dp). Neither app declares overlayable resources and
+// aapt2 emitted no overlay warnings. An explicit module removes the ambiguity.
+//
+// Deliberately NOT under overlay/, so DEVICE_PACKAGE_OVERLAYS cannot also pick
+// the same res dir up and define these resources twice.
+//
+// NO soong_namespace{} block: this directory already inherits
+// device/samsung/a30s's namespace, which exports runtime_resource_overlay
+// (proven by overlay-lineage/GooglePhotosGalleryOverlay). Adding
+// soong_namespace{} here *resets* the namespace and the build then fails with
+//   unrecognized module type "runtime_resource_overlay"
+runtime_resource_overlay {
+    name: "A30sUdfpsEnrollGeometryOverlay",
+    product_specific: true,
+    sdk_version: "current",
+    manifest: "AndroidManifest.xml",
+    resource_dirs: ["res"],
+}

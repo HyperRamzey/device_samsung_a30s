@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Static RRO for com.android.settings, sizing the UDFPS enrollment press target
+  and progress ring to the physical sensor. See Android.bp for why this is an
+  explicit overlay rather than a DEVICE_PACKAGE_OVERLAYS entry.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.samsung.a30s.udfps.enroll.geometry.overlay"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <application android:hasCode="false" />
+    <overlay android:targetPackage="com.android.settings"
+        android:isStatic="true"
+        android:priority="0" />
+</manifest>
