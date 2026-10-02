@@ -102,3 +102,31 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.lmk.kill_heaviest_task=true \
     ro.lmk.swap_free_low_percentage=10 \
     ro.lmk.debug=true
+
+# ART dex2oat threading: AOSP's guidance is that the thread count should equal
+# the number of CPUs in the CPU set. This SoC has 8 CPUs, all present and
+# online (/sys/devices/system/cpu/{online,possible,present} are all "0-7").
+#
+# CPU-SET FORMAT IS NOT A RANGE. odrefresh's IsCpuSetSpecValid()
+# (art/odrefresh/odrefresh.cc:442) splits on ',' and ParseInt()s each token, so
+# a range like "0-7" fails validation and odrefresh aborts the entire
+# compilation with "Invalid CPU set spec". It must be an explicit list.
+#
+# Commas in a value are safe here: PRODUCT_PROPERTY_OVERRIDES emits each
+# whitespace-separated token verbatim (proof in the generated build.prop:
+# ro.system.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi).
+#
+# All eight dalvik.vm.*dex2oat-* properties are in kIgnoredSystemProperties
+# (art/odrefresh/odr_config.h:50), so changing them does NOT invalidate
+# already-compiled artifacts.
+#
+# Only the base and background pairs are set. In
+# AddDex2OatConcurrencyArguments() (odrefresh.cc:454) the background pair falls
+# back to the base pair, but dalvik.vm.boot-dex2oat-* and
+# dalvik.vm.restore-dex2oat-* have NO fallback, so they are left at the dex2oat
+# defaults deliberately rather than changing post-OTA boot behaviour blind.
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.dex2oat-threads=8 \
+    dalvik.vm.dex2oat-cpu-set=0,1,2,3,4,5,6,7 \
+    dalvik.vm.background-dex2oat-threads=8 \
+    dalvik.vm.background-dex2oat-cpu-set=0,1,2,3,4,5,6,7
