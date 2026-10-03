@@ -130,3 +130,21 @@ PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.dex2oat-cpu-set=0,1,2,3,4,5,6,7 \
     dalvik.vm.background-dex2oat-threads=8 \
     dalvik.vm.background-dex2oat-cpu-set=0,1,2,3,4,5,6,7
+
+# --- ET715 under-display fingerprint mask-layer illumination relay -----------
+# This is what replaces the KernelSU module /data/adb/modules/fp_illum, so that
+# module (and fp_udfps_type, whose four properties already live in
+# vendor.prop:23-26) can be deleted. The script needs the exec bit in the tree:
+# PRODUCT_COPY_FILES carries the source file's mode, and init cannot exec a
+# non-executable file - on top of that init has no execute permission on
+# system_file at all, which is why sepolicy/vendor/fp_illum.te defines the
+# fp_illum_exec type that init.fp_illum.rc's service actually runs. It ships
+# to /vendor/bin, not /system/bin: the relay writes a sysfs type that is
+# declared in vendor policy (sysfs_lcd_writable), which sepolicy/private/
+# cannot even name. See the long comment at the top of that .te.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/fp_illum_relay.sh:$(TARGET_COPY_OUT_VENDOR)/bin/fp_illum_relay.sh
+
+# Service definition; starts on sys.boot_completed=1, see the file for why.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/init.fp_illum.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/init.fp_illum.rc

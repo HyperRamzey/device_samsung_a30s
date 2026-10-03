@@ -29,6 +29,21 @@
      animation style is enabled. 136dp x 1.75 = 238 px = the sensor.
 -->
 <resources>
-    <item name="pixel_pitch" format="float" type="dimen">29.7</item>
+    <!-- v2 2026-10-03, halved at the user's request.
+         UdfpsOverlayInteractor.calculateIconSize() is the ONLY sizing lever:
+             iconSize = (udfps_icon_size / pixel_pitch).toInt()
+         with udfps_icon_size fixed at 6000 (micrometres). So:
+             pixel_pitch 29.7 -> iconSize 202 px   (v1, "far too large")
+             pixel_pitch 59.4 -> iconSize 101 px   (v2, half)
+         CAVEAT, do not "correct" this later: 29.7 um/px is the panel's real
+         physical pixel pitch and is the geometrically honest value. It is being
+         repurposed purely as an icon scale knob. 202 px sits inside the 238 px
+         sensor, which is why v1 looked wrong to the eye. -->
+    <item name="pixel_pitch" format="float" type="dimen">59.4</item>
     <dimen name="udfps_animation_size">136dp</dimen>
+    <!-- Nudges the lock-screen glyph 10 px DOWN. Applied as asymmetric padding
+         by DeviceEntryIconViewBinder and AlternateBouncerUdfpsViewBinder.
+         Deliberately NOT done by editing sensor_location, which would lie to the
+         HAL about the sensor position and shift the touch hit-test region. -->
+    <dimen name="udfps_vertical_offset">10px</dimen>
 </resources>

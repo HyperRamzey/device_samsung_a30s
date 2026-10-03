@@ -36,7 +36,16 @@
   119 / scaleFactor (see BUILD_NOTES.md section 25).
 -->
 <resources>
-    <integer name="config_udfpsEnrollProgressBar">119</integer>
-    <dimen name="fingerprint_progress_bar_max_size">136dp</dimen>
-    <dimen name="fingerprint_progress_bar_min_size">68dp</dimen>
+    <!-- v2 2026-10-03, halved at the user's request ("make button 2x smaller").
+         119 was the true sensor RADIUS in px, correct for geometry but far too
+         large visually. Halved to 59 px, preserving the original 1:2 min:max
+         ratio:  59 x 1.75 = 103 px, and 34dp/68dp keep min:max = 1:2.
+         config_udfpsEnrollProgressBar is an INTEGER used as a radius in px scaled
+         by scaleFactor (NOT a dp dimension) - hence <integer>. -->
+    <integer name="config_udfpsEnrollProgressBar">59</integer>
+    <dimen name="fingerprint_progress_bar_max_size">68dp</dimen>
+    <dimen name="fingerprint_progress_bar_min_size">34dp</dimen>
+    <!-- Nudges the enrollment ring 10 px DOWN. Applied to topMargin in
+         UdfpsEnrollView.updateDimensions(). Sensor rect is left truthful. -->
+    <dimen name="udfps_vertical_offset">10px</dimen>
 </resources>
