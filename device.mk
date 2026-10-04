@@ -95,12 +95,48 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.default_network=9,9
 
-# LMK tuning for 2.8GB RAM + zram (OOM forensics 2026-09-18, Morphe SIGKILL):
-# kill heaviest cached task first (fewer kills per MB freed), low-RAM swap
-# floor, lmkd debug for the next forensics round (userdebug only).
+# LMK tuning for 2.7GB RAM + zram, now wired to KERNEL PSI (not vmpressure).
+#
+# The kernel side of PSI is in place: CONFIG_PSI=y in the defconfigs and
+# psi=1 on BOARD_KERNEL_CMDLINE. lmkd reads pressure through libpsi, which
+# opens /proc/pressure/{io,memory,cpu} O_WRONLY and writes
+# "some <threshold_us> <window_us>". Until now every threshold below was
+# unset, so lmkd fell back to vmpressure-style defaults and the PSI signal
+# changed nothing - kernel PSI was only half the feature.
+#
+# Sized for THIS device (2.7 GB / 3860 mAh), not copied from a 4 GB reference:
+#   * minfree_levels follow the AOSP ladder whose top tier (80640 pages =
+#     315 MB) suits 2.7 GB. Units are pages:score.
+#   * upgrade_pressure=60 lets lmkd escalate to the medium PSI level while
+#     ~40% of the window is still clean; downgrade_pressure=100 so it backs
+#     off only once pressure fully clears. Aggressive escalation is correct
+#     on 2.7 GB with zram writeback: stalls are expensive here.
+#   * ro.lmk.critical=0 with critical_upgrade=false - no separate critical
+#     kill tier; the medium PSI level plus kill_heaviest_task does the work.
+#     Avoids double-killing on a device with little headroom.
+#   * swap_util_max=90 stops swapping into zram at 90% use so the backing
+#     partition (once the repartition lands) keeps headroom.
+#   * ro.lmk.debug stays TRUE deliberately: it was enabled for the OOM
+#     forensics round and is the evidence channel for Phase 1 bug #4
+#     (BatteryStats per-app mAh = 0). Do not disable it before that is
+#     closed.
 PRODUCT_PROPERTY_OVERRIDES += \
+    ro.lmk.use_psi=true \
+    ro.lmk.low=1001 \
+    ro.lmk.medium=800 \
+    ro.lmk.critical=0 \
+    ro.lmk.critical_upgrade=false \
+    ro.lmk.upgrade_pressure=60 \
+    ro.lmk.downgrade_pressure=100 \
     ro.lmk.kill_heaviest_task=true \
+    ro.lmk.kill_timeout_ms=100 \
+    ro.lmk.use_minfree_levels=true \
+    ro.lmk.minfree_levels=18432:0,23040:100,27648:200,32256:250,55296:850,80640:950 \
+    ro.lmk.swap_util_max=90 \
     ro.lmk.swap_free_low_percentage=10 \
+    ro.lmk.thrashing_limit=30 \
+    ro.lmk.thrashing_limit_decay=10 \
+    ro.lmk.swap_boost_max=100 \
     ro.lmk.debug=true
 
 # ART dex2oat threading: AOSP's guidance is that the thread count should equal
@@ -131,20 +167,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.background-dex2oat-threads=8 \
     dalvik.vm.background-dex2oat-cpu-set=0,1,2,3,4,5,6,7
 
-# --- ET715 under-display fingerprint mask-layer illumination relay -----------
-# This is what replaces the KernelSU module /data/adb/modules/fp_illum, so that
-# module (and fp_udfps_type, whose four properties already live in
-# vendor.prop:23-26) can be deleted. The script needs the exec bit in the tree:
-# PRODUCT_COPY_FILES carries the source file's mode, and init cannot exec a
-# non-executable file - on top of that init has no execute permission on
-# system_file at all, which is why sepolicy/vendor/fp_illum.te defines the
-# fp_illum_exec type that init.fp_illum.rc's service actually runs. It ships
-# to /vendor/bin, not /system/bin: the relay writes a sysfs type that is
-# declared in vendor policy (sysfs_lcd_writable), which sepolicy/private/
-# cannot even name. See the long comment at the top of that .te.
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/fp_illum_relay.sh:$(TARGET_COPY_OUT_VENDOR)/bin/fp_illum_relay.sh
 
 # Service definition; starts on sys.boot_completed=1, see the file for why.
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/init.fp_illum.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/init.fp_illum.rc
