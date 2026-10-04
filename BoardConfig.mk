@@ -28,8 +28,18 @@ TARGET_KERNEL_CLANG_PATH := /root/toolchains
 TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang HOSTCXX=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- STRIP=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/llvm-strip
 
 # Partitions
+#
+# BOARD_SYSTEMIMAGE_PARTITION_SIZE MUST match the real p25 geometry: mkfs sizes
+# system.img to exactly this value, so the image is partition-sized, not
+# content-sized. Measured content is 3024 MiB, so 4000 MiB leaves ~976 MiB
+# headroom.
+#
+# Was 5033164800 (4800 MiB), the size p25 has today. hm_mod/repart_standalone.sh
+# shrinks p25 to 4000 MiB, so leaving this at 4800 builds an image 800 MiB too
+# large to dd into the new partition. Change this, rebuild, THEN repartition.
+# Reordering those two steps truncates the flash and bricks the phone.
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 55574528
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 5033164800
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 4194304000
 BOARD_CACHEIMAGE_PARTITION_SIZE := 209715200
 BOARD_VENDORIMAGE_PARTITION_SIZE   := 645922816
 
