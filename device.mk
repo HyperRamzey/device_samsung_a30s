@@ -15,6 +15,45 @@ $(call inherit-product, vendor/samsung/a30s/a30s-vendor.mk)
 # Inherit dalvik config
 $(call inherit-product, frameworks/native/build/phone-xhdpi-4096-dalvik-heap.mk)
 
+# lmkd thresholds must be re-asserted in the PRODUCT property space.
+#
+# MEASURED: with the lmkd block only in PRODUCT_PROPERTY_OVERRIDES (which this
+# tree routes to vendor/build.prop), the device reported ro.lmk.medium = 700,
+# not the 800 set here. Cause: phone-xhdpi-4096-dalvik-heap.mk (inherited
+# above, device.mk:16) contributes `ro.lmk.medium?=700` to
+# PRODUCT_PRODUCT_PROPERTIES, which lands in /product/etc/build.prop
+# (generated: out/target/product/a30s/system/product/etc/build.prop:99).
+# Plain ro.* keys are NOT namespaced, and the product property set is loaded
+# AFTER vendor's, so 700 overwrote our vendor-side 800.
+#
+# The same split is why ro.lmk.minfree_levels and ro.lmk.swap_boost_max were
+# absent from getprop on device even though both are present in the built
+# vendor/build.prop (lines 170 and 175): only /product/etc/build.prop was
+# proven to load for this key set on this layout.
+#
+# Fix: emit the whole lmkd block into PRODUCT_PRODUCT_PROPERTIES as well, from
+# a block that comes AFTER the inherit, so each key appears later in the same
+# generated file and therefore wins. Kept in vendor/build.prop too so the
+# tuning survives either load order.
+PRODUCT_PRODUCT_PROPERTIES += \
+    ro.lmk.use_psi=true \
+    ro.lmk.low=1001 \
+    ro.lmk.medium=800 \
+    ro.lmk.critical=0 \
+    ro.lmk.critical_upgrade=false \
+    ro.lmk.upgrade_pressure=60 \
+    ro.lmk.downgrade_pressure=100 \
+    ro.lmk.kill_heaviest_task=true \
+    ro.lmk.kill_timeout_ms=100 \
+    ro.lmk.use_minfree_levels=true \
+    ro.lmk.minfree_levels=18432:0,23040:100,27648:200,32256:250,55296:850,80640:950 \
+    ro.lmk.swap_util_max=90 \
+    ro.lmk.swap_free_low_percentage=10 \
+    ro.lmk.thrashing_limit=30 \
+    ro.lmk.thrashing_limit_decay=10 \
+    ro.lmk.swap_boost_max=100 \
+    ro.lmk.debug=true
+
 # Target Info
 TARGET_DEVICE := a30s
 TARGET_SOC := exynos7904
