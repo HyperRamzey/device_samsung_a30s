@@ -4,29 +4,23 @@ bluetooth.device.default_name=Galaxy A30s
 # Fingerprint
 # ET715 (etspi,et7xx) on SPI1, model A307 — Egis optical under-display sensor.
 # A30s (SM-A307) ships in-display optical, NOT rear capacitive (A30 is rear).
-# sensor_location = <x>|<y>|<radius> in display pixels; the radius sizes the
-# SystemUI hotspot and the mask-lit area. 60 (was 119) makes the button 2x smaller
-# linearly, 4x in area - user request.
-# x=360 y=1350 are user-verified and unchanged: a real press reports
-# ABS_MT_POSITION_X 0x19f (415) / ABS_MT_POSITION_Y 0x545 (1349) via
-# `getevent -lt /dev/input/event1`, so 1350 is the hardware row. (LuK1337's
-# 360|1237|119 read too high, 1450 too low.)
+# sensor_location 360|1350|119 = user-verified display hotspot against stock
+# (LuK1337's 360|1237|119 read too high; 1450 read too low; 1350 confirmed).
 # request_touch_event is required for the optical enroll path.
 # Illumination color is green via overlay config_udfpsColor (#00ff50), matching
 # DT etspi-rb 00FF00 — AOSP white is rejected by the trustlet (BAD_QUALITY 39).
 #
-# force_calibrate is false, and that is the verified working value (2026-10-01:
-# prints[0].count reached 1 and two unlocks succeeded).
-#
-# CORRECTION 2026-10-06. The previous comment here stated that with
-# force_calibrate=true the HAL "never sends" request(22,2), because
-# Session::enroll() clears mCaptureReady and both pointer handlers then take the
-# suppressing branch. That mechanism is real, but the conclusion was overstated.
-# In a run that DID enroll (count=1) with force_calibrate=true, request(22,param=2)
-# was sent 126 times - the swallow gate never fired, because mCaptureReady was
-# true. So true does not unconditionally suppress touches; it depends on
-# mCaptureReady at the time. false remains correct and is kept.
+# force_calibrate MUST be false. It is read live by getprop on every pointer
+# event, and the AIDL HAL gates the UDFPS pointer callbacks on it:
+#   Session::onPointerDown(): if (force_calibrate && !mCaptureReady) -> "swallowed
+#       (calibration pending)" and request(22,2) is NEVER sent
+#   Session::onPointerUp()  : if (force_calibrate && mCaptureReady) -> request(22,1)
+#       is skipped
+# Session::enroll() also clears mCaptureReady when it is true, which is exactly
+# what puts both handlers on the suppressing branch. With this set, the sensor is
+# never told a finger is present, so no capture can exist and enrollment ends in a
+# HAL-side timeout. Verified on device: with it false, prints[0].count reached 1.
 ro.vendor.fingerprint.type=udfps_optical
-ro.vendor.fingerprint.sensor_location=360|1350|60
+ro.vendor.fingerprint.sensor_location=360|1350|119
 ro.vendor.fingerprint.force_calibrate=false
 ro.vendor.fingerprint.request_touch_event=true
