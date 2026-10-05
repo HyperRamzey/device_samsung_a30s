@@ -36,13 +36,34 @@
   119 / scaleFactor (see BUILD_NOTES.md section 25).
 -->
 <resources>
-    <!-- v2 2026-10-03, halved at the user's request ("make button 2x smaller").
-         119 was the true sensor RADIUS in px, correct for geometry but far too
-         large visually. Halved to 59 px, preserving the original 1:2 min:max
-         ratio:  59 x 1.75 = 103 px, and 34dp/68dp keep min:max = 1:2.
-         config_udfpsEnrollProgressBar is an INTEGER used as a radius in px scaled
-         by scaleFactor (NOT a dp dimension) - hence <integer>. -->
-    <integer name="config_udfpsEnrollProgressBar">59</integer>
+    <!-- v3 2026-10-06, halved again at the user's request ("half it again").
+         v2 (2026-10-03) set 59 and the user still saw an oversized REAL button -
+         the SystemUI glyph (udfps_geometry.xml, pixel_pitch 59.4) is the FAKE one
+         and was already halved; this RRO targets com.android.settings and is the
+         REAL enrollment press target.
+
+         The arithmetic, measured rather than guessed:
+           UdfpsEnrollView.java:119-121
+               mProgressBarRadius = (int)(scaleFactor * getInteger(<this>))
+           UdfpsUtils.java:43-53 -> scaleFactor = maxPhysicalMode / naturalMode.
+           This panel reports exactly ONE mode (720x1560) and dumpsys display shows
+           physicalPixelDisplaySizeRatio={1.0}, so scaleFactor == 1.0 and the
+           integer IS the pixel radius.
+           UdfpsEnrollView.java:155-165 then sizes the view as
+               width = sensorBounds.width + 2 * mProgressBarRadius
+                    = 238 + 2 * integer
+           59 -> 356 px (1.50x the 238 px sensor);  29 -> 296 px (1.24x).
+         29 halves the excess padding and keeps a non-zero ring so it does not
+         collapse onto the sensor edge.
+
+         Verified the override is live: cmd overlay dump reports
+         mState=STATE_ENABLED, mTargetPackageName=com.android.settings, and an
+         idmap entry 0x7f0c001b -> 0x7f020000 for
+         integer/config_udfpsEnrollProgressBar.
+
+         config_udfpsEnrollProgressBar is an INTEGER used as a px radius scaled by
+         scaleFactor, NOT a dp dimension - hence <integer>. -->
+    <integer name="config_udfpsEnrollProgressBar">29</integer>
     <dimen name="fingerprint_progress_bar_max_size">68dp</dimen>
     <dimen name="fingerprint_progress_bar_min_size">34dp</dimen>
     <!-- Nudges the enrollment ring 10 px DOWN. Applied to topMargin in
