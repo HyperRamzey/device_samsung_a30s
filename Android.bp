@@ -1,2 +1,22 @@
 soong_namespace {
 }
+
+// Derp: charger-token-boot handoff.
+//
+// A charger-token boot - cable inserted while the phone is powered off, so the
+// bootloader comes up with androidboot.mode=charger - never starts Android on
+// its own: init queues the "charger" event instead of "late-init", healthd
+// takes the display, and zygote/system_server never start, so the phone sits
+// on the charging animation until a long press.
+//
+// derp_charger_token.rc performs that handoff directly with two init builtins
+// (class_stop charger, then trigger late-init) on ro.bootmode=charger. It is
+// installed by device.mk via PRODUCT_COPY_FILES: an init rc needs neither an
+// exec bit nor a binary, so no sh_binary module is involved.
+//
+// The earlier one-shot reboot guard is gone. It existed because both
+// co-processors stayed dead after this handoff, but that failure is now fixed
+// at the root in the kernel (s2mpu08_pmic_probe() used to clear the CP rails
+// on every charger-token boot), and the guard also needed an exec type this
+// user build does not have - it exec'd u:r:su:s0, while root here is
+// u:r:ksu:s0, so it was a silent no-op anyway.

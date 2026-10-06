@@ -1,0 +1,47 @@
+# Derp: charger-token-boot handoff.
+#
+# From system/core/init/init.cpp:
+#
+#     std::string bootmode = GetProperty("ro.bootmode", "");
+#     if (bootmode == "charger") {
+#         am.QueueEventTrigger("charger");     // class_start charger
+#     } else {
+#         am.QueueEventTrigger("late-init");   // normal boot proceeds
+#     }
+#
+# So on a charger-token boot init deliberately queues "charger" and never
+# queues "late-init". healthd takes the display and the rest of Android -
+# zygote, system_server - never starts, so the phone sits on the charging
+# animation indefinitely. The only escape is init.rc's
+#
+#     on property:sys.boot_from_charger_mode=1
+#         class_stop charger
+#         trigger late-init
+#
+# and that property is set in exactly one place: healthd_mode_charger.cpp,
+# after a 2 s power-key hold (POWER_ON_KEY_TIME = 2 * MSEC_PER_SEC). With
+# ro.charger_mode_autoboot unset nothing hands off on its own, which is why
+# only a long press - a "hard reset" - ever got past it.
+#
+# This performs that handoff directly. Both are init builtins, so there is no
+# property_service check and no SELinux domain involved - deliberately, after
+# a first attempt that used "setprop sys.boot_from_charger_mode 1" and booted
+# into a loop (init re-ran late-init, which re-ran post-fs-data, which set the
+# property again). Doing this from a property trigger removes that possibility:
+# the trigger fires once, when ro.bootmode becomes charger, and late-init
+# would otherwise never have run at all on this boot.
+#
+# The co-processors used to stay dead on a charger-token boot even after this
+# handoff - the CP reset sequencer stuck at RESET_SEQUENCER_STATUS 0x3 instead
+# of 0x5, the mx140 WLAN firmware never answered, so there was no WiFi and no
+# RIL - and a one-shot warm reboot guarded around it. That is fixed at the root
+# in the kernel instead: s2mpu08_pmic_probe() cleared the enable bits on
+# LDO16/LDO17/LDO15/Buck9 whenever lpcharge was set, i.e. on every
+# charger-token boot, and keeping them up takes the CP to 0x5 with 0 pmucal
+# timeouts and a live baseband (verified 5/5 consecutive charger boots). The
+# reboot guard and its script are therefore removed; they also exec'd
+# u:r:su:s0, which does not exist here (root is u:r:ksu:s0), so they never ran.
+
+on property:ro.bootmode=charger
+    class_stop charger
+    trigger late-init

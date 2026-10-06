@@ -209,3 +209,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Service definition; starts on sys.boot_completed=1, see the file for why.
 PRODUCT_COPY_FILES += \
+
+# Derp charger-token-boot handoff.
+#
+# Installed with PRODUCT_COPY_FILES rather than a sh_binary init_rc: the guard
+# script that needed an exec type is gone (u:r:su:s0 does not exist on this
+# user build - root here is u:r:ksu:s0), and there is no script left to hang
+# init_rc off. The handoff itself is two init builtins and needs no binary.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/derp_charger_token.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/derp_charger_token.rc
