@@ -97,17 +97,22 @@ PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 # PWRON latch after freezes). init.rc handles the property.
 PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
 
-# bpfloader version gate. bpfloader.rs:428 honours ro.bpf.kver_override (added
-# by commit 6c5f4f8, 'bpfloader: Allow overriding kernel version'). On this 4.4
-# kernel the loader otherwise version-gates every map and program out, loads
-# nothing, and never sets bpf.progs_loaded - so lmkd/netd log 'BPF-less kernel?'
-# and report empty network stats. The kernel already backports what the traffic
-# programs need: bpf_obj_pin/bpf_obj_get, cgroup+socket+net_cls BPF, and
-# array/hashtable/percpu/lpm maps (bpftool feature probe: 'bpf() syscall for
-# unprivileged users is enabled'). 5.4.0 is the highest honest claim - the
-# backport has no ringbuf (5.8), local_storage (5.7) or queue_stack_maps (5.9),
-# so claiming 5.10 would make bpfloader request maps bpf() cannot create.
-PRODUCT_VENDOR_PROPERTIES += ro.bpf.kver_override=5.4.0
+# bpfloader version gate. netbpfload (packages/modules/Connectivity/bpf/loader/
+# NetBpfLoad.cpp, reached via bpf/headers/include/bpf/KernelUtils.h
+# getKernelVersion) honours ro.bpf.kver_override. On this 4.4 kernel the loader
+# otherwise version-gates every map and program out, loads nothing, and never
+# sets bpf.progs_loaded - so lmkd/netd log 'BPF-less kernel?' and report empty
+# network stats. The kernel already backports what the traffic programs need:
+# bpf_obj_pin/bpf_obj_get, cgroup+socket+net_cls BPF, array/hashtable/percpu/
+# lpm maps, and (see kernel commit for patch_arsh.py) BPF_ARSH scalar tracking.
+# 4.13.0 is the highest honest claim: >=4.14 trips netbpfload's validateProg
+# JIT gate (mainline programs get jit:0 on this kernel), 5.4 would demand
+# DEVMAP_HASH maps the backport cannot create, and 4.13 selects the 4_9
+# program variants ([4_9, 4_19)) that this kernel's verifier now accepts.
+# Must be SYSTEM, not VENDOR: a vendor-namespace prop is not readable by the
+# loader during early boot (SELinux default_prop labelling) - moving it here
+# is what actually delivers the claim.
+PRODUCT_SYSTEM_PROPERTIES += ro.bpf.kver_override=4.13.0
 
 # Samsung SEH radio manager: binds vendor.samsung.hardware.radio ISehRadio
 # (HIDL 2.x) + sends FW_READY. Without it Samsung rild exits (clean) every
