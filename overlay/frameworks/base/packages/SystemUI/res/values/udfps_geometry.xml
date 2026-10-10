@@ -39,6 +39,9 @@
          physical pixel pitch and is the geometrically honest value. It is being
          repurposed purely as an icon scale knob. 202 px sits inside the 238 px
          sensor, which is why v1 looked wrong to the eye. -->
+    <!-- 59.4 gives iconSize = 6000/59.4 = 101px inside the 238px sensor, the ~0.85
+         proportion the reference build uses. Left stock: the lock-screen button is sized
+         separately in DefaultDeviceEntrySection (UDFPS_ICON_SIZE_FACTOR). -->
     <item name="pixel_pitch" format="float" type="dimen">59.4</item>
     <dimen name="udfps_animation_size">136dp</dimen>
     <!-- Nudges the lock-screen glyph 10 px DOWN. Applied as asymmetric padding

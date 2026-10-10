@@ -68,5 +68,5 @@
     <dimen name="fingerprint_progress_bar_min_size">34dp</dimen>
     <!-- Nudges the enrollment ring 10 px DOWN. Applied to topMargin in
          UdfpsEnrollView.updateDimensions(). Sensor rect is left truthful. -->
-    <dimen name="udfps_vertical_offset">10px</dimen>
+    <dimen name="udfps_vertical_offset">25px</dimen>
 </resources>
