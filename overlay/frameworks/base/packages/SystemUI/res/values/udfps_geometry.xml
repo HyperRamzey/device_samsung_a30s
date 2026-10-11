@@ -44,9 +44,11 @@
          separately in DefaultDeviceEntrySection (UDFPS_ICON_SIZE_FACTOR). -->
     <item name="pixel_pitch" format="float" type="dimen">59.4</item>
     <dimen name="udfps_animation_size">136dp</dimen>
-    <!-- Nudges the lock-screen glyph 10 px DOWN. Applied as asymmetric padding
-         by DeviceEntryIconViewBinder and AlternateBouncerUdfpsViewBinder.
-         Deliberately NOT done by editing sensor_location, which would lie to the
-         HAL about the sensor position and shift the touch hit-test region. -->
-    <dimen name="udfps_vertical_offset">10px</dimen>
+    <!-- Nudges the lock-screen glyph 20 px DOWN. Applied as asymmetric padding
+         by DeviceEntryIconViewBinder and AlternateBouncerUdfpsViewBinder, and as a
+         plain translate by UdfpsSurfaceView so the green illumination dot lands on
+         the button. Deliberately NOT done by editing sensor_location, which would
+         lie to the HAL about the sensor position and shift the touch hit-test
+         region. -->
+    <dimen name="udfps_vertical_offset">20px</dimen>
 </resources>
