@@ -1,0 +1,18 @@
+{
+    "response": [
+        {
+            "maintainer": "HyperRamzey",
+            "oem": "Samsung",
+            "device": "Galaxy A30s",
+            "filename": "crDroidAndroid-16.0-20261015-a30s-v12.12.zip",
+            "download": "https://github.com/HyperRamzey/device_samsung_a30s/releases/download/0.7.9/crDroidAndroid-16.0-20261015-a30s-v12.12.zip",
+            "timestamp": 1792022400,
+            "sha256": "60e6ed23cb2e2f8ed4621b7eeb1dc1a970102f2bf02eaffab3ec5377dc5c813f",
+            "size": 1803694571,
+            "version": "12.12",
+            "os_sdk_level": 36,
+            "buildtype": "Full",
+            "md5": "10576738794526bde8e1d093e0ccef88"
+        }
+    ]
+}
