@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HyperRamzey crDroid 16 fork - point the OTA updater at this fork's release feed.
+
+    Feed: regenerated after every release by the Derp repo tool
+        hm_mod/make_ota_json.py
+    which pushes a30s.json to the `ota` branch of this repo:
+        https://raw.githubusercontent.com/HyperRamzey/device_samsung_a30s/ota/a30s.json
+
+    Constraints that matter (packages/apps/Updater source, rev 9a07d99):
+      - fetching the feed does NOT follow redirects: the URL must answer 200 directly
+        (raw.githubusercontent does; a release asset URL would 302 and fail);
+      - the feed entry carries os_sdk_level 36 so it stays install-able on Android 16;
+      - the downloads/changelog menu entries point at the releases page because this
+        device has no crdroid.net / SourceForge page.
+
+    Overlay path matches the Updater module's resource dir by full source path:
+        overlay-lineage/packages/apps/Updater/app/src/main/res/values/strings.xml
+    (device.mk wires DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage)
+-->
+<resources>
+    <string name="updater_server_url" translatable="false">https://raw.githubusercontent.com/HyperRamzey/device_samsung_a30s/ota/a30s.json</string>
+    <string name="menu_downloads_url" translatable="false">https://github.com/HyperRamzey/device_samsung_a30s/releases</string>
+    <string name="menu_changelog_url" translatable="false">https://github.com/HyperRamzey/device_samsung_a30s/releases</string>
+</resources>
