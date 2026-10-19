@@ -113,6 +113,14 @@ PRODUCT_VENDOR_PROPERTIES += ro.enable_boot_charger_mode=true
 # loader during early boot (SELinux default_prop labelling) - moving it here
 # is what actually delivers the claim.
 PRODUCT_SYSTEM_PROPERTIES += ro.bpf.kver_override=4.13.0
+# MGLRU (backported in the 4.4 kernel tree): default value for the
+# mglru_native DeviceConfig flag. core is the honest target on Exynos 7885
+# (ARMv8.0, no hardware AF/DBM): asking for all would read back the same
+# 0x0001 in /sys/kernel/mm/lru_gen/enabled. SYSTEM, not VENDOR: init loads
+# /system/build.prop under u:r:init:s0, which has the AOSP blanket allow for
+# property_type:property_service set (no sepolicy change needed). A value
+# persisted in /data/property wins over this default.
+PRODUCT_SYSTEM_PROPERTIES += persist.device_config.mglru_native.lru_gen_config=core
 
 # Samsung SEH radio manager: binds vendor.samsung.hardware.radio ISehRadio
 # (HIDL 2.x) + sends FW_READY. Without it Samsung rild exits (clean) every
@@ -126,9 +134,13 @@ PRODUCT_PACKAGES += sehradiomanager
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/mixer_paths.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths.xml
 
-# SkiaVK renderer + Camera HAL3 (merged from Skia_Vulkan_MOD). The module QCOM pile is placebo on Exynos and is skipped, as is spkr_prot disable (removes speaker protection).
+# Camera HAL3 (merged from Skia_Vulkan_MOD). The SkiaVK renderer override was
+# removed 2026-10-18: forcing skiavk broke the Antutu video-edit subtest
+# (score 0.0; without the override the renderer defaults to skiagl because
+# ro.hwui.use_vulkan is empty). See docs/projects/VIDEO-MODULE.md. The module
+# QCOM pile is placebo on Exynos and is skipped, as is spkr_prot disable
+# (removes speaker protection).
 PRODUCT_PROPERTY_OVERRIDES += \
-    debug.hwui.renderer=skiavk \
     persist.camera.HAL3.enabled=1 \
     persist.vendor.camera.HAL3.enabled=1
 
