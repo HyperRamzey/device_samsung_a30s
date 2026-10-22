@@ -235,3 +235,13 @@ PRODUCT_COPY_FILES += \
 # init_rc off. The handoff itself is two init builtins and needs no binary.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/derp_charger_token.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/derp_charger_token.rc
+
+# AGC first-boot self-update: AGC is a /system app whose PairIP-protected
+# runtime crashes only in the /system install context; pm records the same
+# APK as an update to /data/app at first boot and the app runs. Crash
+# evidence and the test matrix are in docs/projects/CAMERA_CAPTURE_STALL.md
+# (PairIP / system-install section). The .rc starts the script on
+# sys.boot_completed=1 in the shell domain.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/agc_boot_update.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/agc_boot_update.sh \
+    $(LOCAL_PATH)/agc_boot_update.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/agc_boot_update.rc

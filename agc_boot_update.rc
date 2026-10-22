@@ -1,0 +1,21 @@
+# AGC (com.samsung.android.ruler) first-boot self-update.
+#
+# AGC ships as a /system app (PRODUCT_PACKAGES, presigned import) but its
+# PairIP-protected runtime SIGSEGVs in the /system install context. The same
+# APK runs once PackageManager records an update of the system package, so
+# this service reinstalls the APK over itself once per clean /data. Details
+# and crash evidence: docs/projects/CAMERA_CAPTURE_STALL.md.
+#
+# The service runs in the shell domain: user shell + seclabel u:r:shell:s0,
+# which init is allowed to reach from shell_exec (system/sepolicy/private/
+# init.te: domain_trans(init, shell_exec, shell)). That is exactly the
+# uid+domain adb shell has, and `pm install` was verified working there.
+service agc_boot_update /system/bin/sh /system/bin/agc_boot_update.sh
+    user shell
+    group shell
+    seclabel u:r:shell:s0
+    oneshot
+    disabled
+
+on property:sys.boot_completed=1
+    start agc_boot_update
