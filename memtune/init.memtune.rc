@@ -1,0 +1,46 @@
+# Derp memory tuning, in-tree. docs/15-MEMORY-MANAGEMENT.md sections 22-26.
+#
+# Why this is here and not in a KernelSU module:
+#   A factory reset wipes /data/adb/modules, so a module silently stops applying and
+#   the device returns to the kill-storm behaviour with nothing reporting it. This is
+#   in-tree and needs no root feature.  The KernelSU copy (hm_mod/ksu_modules/memtune/)
+#   is kept only for the adb-only path.
+#
+# Why `on boot` and not `on post-fs-data`:
+#   docs/15 22.2 measured that lmkd rewrites the minfree kernel parameter from its
+#   properties at every boot, and lmkd starts after post-fs-data.  Anything written
+#   there is overwritten.  `on boot` runs once init is up, i.e. after lmkd has had its
+#   turn, so these writes land last.  The minfree TABLE itself is set as a property
+#   (see device.mk: sys.lmk.minfree_levels) which lmkd reads directly.
+#
+# The values and the reason for each are documented in device.mk next to the
+# PRODUCT_SYSTEM_PROPERTIES line.  Two things are deliberately NOT written here:
+#   - min_free_kbytes: left at the vendor value 32768.  docs/15 25.3 shows 131072
+#     would exceed the adj-0 LMK tier (an inverted ordering) and cost more than the
+#     ion headroom.  64 MB is below the adj-0 tier so it is safe but buys nothing
+#     measured, so the vendor value stands rather than being changed for appearances.
+#   - zswap max_pool_percent: measured irrelevant here (docs/15 26.3).
+
+on boot
+    # kswapd band: 32 MB min_free + 24 MB extra = a real margin so kswapd runs
+    # ahead of the camera's allocations instead of the allocator hitting direct
+    # reclaim and taking -EINVAL on a high-order ION page.
+    write /proc/sys/vm/extra_free_kbytes 24576
+
+    # Eager dentry/inode reclaim. Stock 50 preserves dentry/inode cache ahead of
+    # anon, which on this device is the wrong bias under camera pressure.
+    write /proc/sys/vm/vfs_cache_pressure 150
+
+    # Enable swap readahead.  INERT on this kernel: CONFIG_SWAP_ENABLE_READAHEAD
+    # is not compiled (docs/15 21.1), so nothing reads the value.  Written so the
+    # file states what was measured rather than leaving the stock 0 that turned it
+    # off.  Do NOT cite this as a win in any future measurement.
+    write /proc/sys/vm/page-cluster 3
+
+    # Belt-and-braces for the minfree table. The property in device.mk is the
+    # intended lever; this is the direct write in case a property name changes or
+    # lmkd stops honouring it. COMMA-separated - docs/15 22.2 records that a
+    # space-separated write zeroed the array, collapsed the driver's array_size to
+    # 0, and silently DISABLED the in-kernel LMK, leaving only the OOM killer.
+    # Verified live: after boot the parameter must read exactly the string below.
+    write /sys/module/lowmemorykiller/parameters/minfree 12288,16384,20480,24576,61440,81920

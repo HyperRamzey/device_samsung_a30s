@@ -27,12 +27,12 @@ PRODUCT_MODEL := SM-A307F
 PRODUCT_BRAND := samsung
 PRODUCT_MANUFACTURER := samsung
 
-# Bring-up: ship the build host's adb public key as a product adb_keys file
-# (/product/etc/security/adb_keys, world-readable). adbd's IteratePublicKeys
-# fallback reads /adb_keys (symlink to this) when the framework auth broker is
-# unavailable (system_server hung/crashed during bring-up), authorizing this
-# host without the RSA confirmation dialog.
-PRODUCT_ADB_KEYS := device/samsung/exynos7885-common/adb/adb_keys
+# PRODUCT_ADB_KEYS must stay unset on release builds: it ships the build
+# host's public key as /product/etc/security/adb_keys (symlinked to
+# /adb_keys), which authorizes that host for adb shell on every device
+# running this build with no RSA confirmation prompt. Removed for the
+# public release (GitHub issue #2); adbd loads user keys from
+# /data/misc/adb/adb_keys instead.
 
 PRODUCT_GMS_CLIENTID_BASE := android-samsung
 
