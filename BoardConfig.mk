@@ -24,8 +24,10 @@ BOARD_MKBOOTIMG_ARGS += --cmdline "$(BOARD_KERNEL_CMDLINE)"
 TARGET_KERNEL_CONFIG := full/exynos7885-a30s_defconfig
 # Use prebuilt clang for host tools (Debian gcc-14 errors on implicit decls in 4.4 vendor scripts)
 # a30s: Neutron Clang 24 builds the kernel (proven trial-3); host tools stay on stock r563880c (Neutron segfaults host binaries vs glibc-2.17 sysroot)
-TARGET_KERNEL_CLANG_PATH := /root/toolchains
-TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang HOSTCXX=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- STRIP=/root/rom/crdroid16/prebuilts/clang/host/linux-x86/clang-r563880c/bin/llvm-strip
+# Portable: native Arch exports TARGET_KERNEL_CLANG_PATH=/mnt/aosp/toolchains/neutron-clang-24
+# from hm_mod/lib/derp_env.sh; without it this falls back to $(HOME)/toolchains (the WSL layout).
+TARGET_KERNEL_CLANG_PATH ?= $(HOME)/toolchains
+TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=$(shell pwd)/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang HOSTCXX=$(shell pwd)/prebuilts/clang/host/linux-x86/clang-r563880c/bin/clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- STRIP=$(shell pwd)/prebuilts/clang/host/linux-x86/clang-r563880c/bin/llvm-strip
 
 # Partitions
 #
