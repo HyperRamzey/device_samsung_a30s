@@ -19,3 +19,49 @@ android_app_import {
         enabled: false,
     },
 }
+
+// KernelSU manager (rsuntk/KernelSU v3.2.2-10-legacy, versionCode 32490).
+//
+// Shipped in /system/app so a data wipe cannot leave the device without the
+// manager: the kernel driver is built in (CONFIG_KSU, KSU_VERSION 32473) and the
+// APK is what turns it into usable root. `presigned` keeps the release
+// signature, and dex_preopt is off because the APK is precompiled and its size
+// does not justify a vdex in the system image.
+//
+// The APK itself is gitignored (prebuilt/*.apk). The download URL and sha256 are
+// recorded in device.mk next to the PRODUCT_PACKAGES entry.
+//
+// skip_preprocessed_apk_checks is required, not cosmetic: the release APK has its
+// lib/*/libkernelsu.so compressed, and check_prebuilt_presigned_apk.py rejects
+// that for preprocessed prebuilts ("Contains compressed JNI libraries"). The
+// check exists because GMS-signed APKs must keep JNI libs STORED so they can be
+// mmapped, but a zip entry can only be made STORED by rewriting the archive,
+// which invalidates the APK signature scheme v2 signature that `presigned`
+// exists to protect.
+//
+// The APK stays byte-identical, so PackageManager does NOT extract those
+// compressed entries - a pristine system app never has them extracted, its
+// nativeLibraryDir is just /system/app/KernelSU/lib/arm64. device.mk therefore
+// installs the four arm64 libraries at exactly that path (PRODUCT_COPY_FILES);
+// without them the manager dies on launch with
+// UnsatisfiedLinkError: dlopen failed: library "libkernelsu.so" not found.
+//
+// filename is the package name, not the module name, on purpose: the kernel
+// finds the manager by reading /data/system/packages.list, which is keyed by
+// package, and it can only learn the package from the APK's path. For a
+// /data/app payload it strips the "-<hash>" suffix PackageManager appends; for a
+// preinstalled APK it takes the file name minus ".apk". So this file name must
+// stay equal to the APK's package (see get_pkg_from_apk_path() in the KernelSU
+// kernel driver) or the manager is never crowned and reports "unsupported".
+android_app_import {
+    name: "KernelSU",
+    apk: "KernelSU.apk",
+    filename: "wffxxf.nclgit.cawxcw.apk",
+    presigned: true,
+    preprocessed: true,
+    skip_preprocessed_apk_checks: true,
+    enforce_uses_libs: false,
+    dex_preopt: {
+        enabled: false,
+    },
+}

@@ -1,0 +1,8 @@
+Changelog placeholder.
+
+This file is installed to /system/etc/Changelog.txt because the path has to be a
+declared build output, or the image builder drops it. vendor/lineage/build/tools/
+changelog.sh overwrites it with the real per-build changelog as the first command
+of the system-image rule, before build_image packs the tree.
+
+If you are reading this on a device, the changelog step did not run.

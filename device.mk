@@ -66,6 +66,90 @@ TARGET_SCREEN_WIDTH := 1080
 PRODUCT_PACKAGES += \
     android.hardware.biometrics.fingerprint-service.samsung
 
+# KernelSU manager, shipped as a system app.
+#
+# The kernel side is built into this ROM (CONFIG_KSU=y, KSU_VERSION 32473), but
+# the manager app was only ever installed by hand into /data, so formatting data
+# left the device with a root-capable kernel and no way to grant root. Naming it
+# here puts the APK in /system/app and it is present on the first boot after a
+# data wipe.
+#
+# prebuilt/KernelSU.apk is not tracked (prebuilt/*.apk is gitignored, like the
+# AGC and Google Photos APKs). Re-fetch it before a clean build:
+#
+#   curl -L -o prebuilt/KernelSU.apk \
+#     https://github.com/rsuntk/KernelSU/releases/download/v3.2.2-10-legacy/\
+#     KernelSU_v3.2.2-10-legacy-42-g915b4872_32490-release.apk
+#   sha256sum prebuilt/KernelSU.apk   # 78fe80980e65d30ced2a5f560680f8d6343d4443baee4c3bf1c82cbd6847147d
+#
+# v3.2.2-10-legacy (32490) is the release that reports "Working LEGACY,
+# Version: 32473" against this kernel; the package name inside the APK is the
+# randomized wffxxf.nclgit.cawxcw, which is what `pm list packages` will show.
+PRODUCT_PACKAGES += \
+    KernelSU
+
+# KernelSU's native libraries must sit NEXT TO the APK, not inside it.
+#
+# The release APK ships lib/arm64-v8a/*.so DEFLATED and declares
+# android:extractNativeLibs="true". For a pristine system app PackageManager
+# never extracts anything: ApplicationInfo.nativeLibraryDir is simply
+# /system/app/<name>/lib/<abi>, and with nothing there System.loadLibrary dies:
+#
+#   E AndroidRuntime: java.lang.UnsatisfiedLinkError:
+#       dlopen failed: library "libkernelsu.so" not found
+#           at wffxxf.nclgit.cawxcw.Natives.<clinit>
+#
+# Verified on device 2026-10-24: the manager crashed from /system/app and worked
+# only after the same APK was installed as a data-app update.
+#
+# Uncompressing the entries inside the APK is not an option: the APK is presigned
+# and rewriting it invalidates the v2/v3 signature. Installing the libraries
+# beside it is what LOCAL_PREBUILT_JNI_LIBS does for make-based prebuilts, and it
+# leaves the APK byte-identical.
+#
+# libksud.so and libmagiskboot.so must keep their executable bit through the
+# copy: the manager does not load them, it RUNS them. KsuCli builds its root
+# shell from `<nativeLibraryDir>/libksud.so` (ksud's own su server) and hands
+# libmagiskboot.so to `ksud install`, which copies it to /data/adb/ksu/bin and
+# executes it. With the 0644 that unzip produces, a fresh install dies with
+#
+#   W KsuCli: Caused by: java.io.IOException:
+#       Cannot run program "/system/app/KernelSU/lib/arm64/libksud.so":
+#       error=13, Permission denied
+#
+# and the manager cannot bootstrap /data/adb/ksu at all. PRODUCT_COPY_FILES copies
+# with rm -f + cp, so the staged file keeps the source mode - but that is NOT what
+# the image gets: mkfs.erofs calls libcutils fs_config(), and the generic
+# "system/app/*" rule there forces 0644 on everything below it. The executable bit
+# is therefore declared in system/core/libcutils/fs_config.cpp (two explicit 00755
+# entries), which is the only lever that reaches the image. Verify on the mounted
+# built system.img, never on the staged tree.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libadbroot.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libadbroot.so \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libkernelsu.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libkernelsu.so \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libksud.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libksud.so \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libmagiskboot.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libmagiskboot.so
+
+# /system/etc/Changelog.txt MUST be a declared output.
+#
+# vendor/lineage/build/tools/changelog.sh writes it with
+#     cp Changelog.txt $OUT_DIR/target/product/$DEVICE/system/etc/
+# and the build invokes that script as the FIRST command of the system-image
+# rule - i.e. AFTER obj/PACKAGING/system_intermediates/file_list.txt was
+# generated from the declared install list. system.img is packed with
+#     build_image --input-directory-filter-file .../file_list.txt
+# so anything absent from that list is dropped from the image, while the OTA zip
+# (packed from the raw staging tree by add_img_to_target_files) still ships it.
+# Result before this entry: the zip carried etc/Changelog.txt and the flashed
+# image did not - a silent image/zip divergence, which hm_mod/prep_flash.sh
+# refuses to stage past.
+#
+# Declaring the path here puts it in file_list.txt; changelog.sh then overwrites
+# the installed placeholder with the real changelog before build_image runs, so
+# the packed file is the current one, not the placeholder text.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/prebuilt/Changelog.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/Changelog.txt
+
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml
 
