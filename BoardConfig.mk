@@ -31,19 +31,32 @@ TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=$(shell pwd)/prebuilts/clang/host/linux
 
 # Partitions
 #
-# BOARD_SYSTEMIMAGE_PARTITION_SIZE MUST match the real p25 geometry: mkfs sizes
-# system.img to exactly this value, so the image is partition-sized, not
-# content-sized. Measured content is 3024 MiB, so 4000 MiB leaves ~976 MiB
-# headroom.
+# Geometry is the LIVE one, re-measured 2026-10-09 from both the recovery and
+# the booted kernel and recorded in docs/40-DEVICE-INVARIANTS.md:
+#   p25 system = 2,600,468,480 B (2480 MiB)
+#   p26 vendor =   268,435,456 B ( 256 MiB)
+# These MUST match, because PARTITION_SIZE is the hard cap on the image and the
+# block OTA writes every block the transfer list names.
 #
-# Was 5033164800 (4800 MiB), the size p25 has today. hm_mod/repart_standalone.sh
-# shrinks p25 to 4000 MiB, so leaving this at 4800 builds an image 800 MiB too
-# large to dd into the new partition. Change this, rebuild, THEN repartition.
-# Reordering those two steps truncates the flash and bricks the phone.
+# The tree was re-imported on 2026-10-22 with 4194304000/645922816 (an ODIN
+# restore had already reset the partitions back to the stock sizes). Those
+# values cannot flash: the ext4 images they produce are 3.0 GiB/277 MiB, i.e.
+# larger than the partitions.
+#
+# FIX: build system and vendor as EROFS (as this tree did before the re-import,
+# commit "BoardConfigCommon: build system and vendor images as erofs",
+# 2026-10-08). EROFS output is content-sized and compressed:
+#   Oct-13 image: system 2,074,411,008 B (506,448 blocks), vendor 155,131,904 B
+# Both fit the live geometry with room to spare. The 4.4 kernel has
+# CONFIG_EROFS_FS(_ZIP)=y and supports the LZ4 0padding format that the default
+# BOARD_EROFS_COMPRESSOR (lz4hc,9) emits; fstab.exynos7904 already carries both
+# the ext4 and erofs lines.
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 55574528
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 4194304000
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2600468480
 BOARD_CACHEIMAGE_PARTITION_SIZE := 209715200
-BOARD_VENDORIMAGE_PARTITION_SIZE   := 645922816
+BOARD_VENDORIMAGE_PARTITION_SIZE   := 268435456
 
 # Properties
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
