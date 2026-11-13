@@ -28,6 +28,10 @@ ifeq ($(DERP_TESTING),1)
 WITH_ADB_INSECURE := true
 endif
 
+# Mali-G71 MP2: background blur makes the notification shade janky (upstream
+# issue #7). Read by vendor/lineage/config/crdroid.mk, so set before the inherit.
+TARGET_SUPPORTS_BLUR := false
+
 # Inherit LineageOS common device config
 PRODUCT_NO_CAMERA := true
 
