@@ -358,3 +358,41 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/agc_boot_update.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/agc_boot_update.sh \
     $(LOCAL_PATH)/agc_boot_update.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/agc_boot_update.rc
+
+# Google Photos: the bundle parts, staged read-only, plus the first-boot installer.
+#
+# Google Photos is published as an Android App Bundle only. Its base APK declares
+#   android:requiredSplitTypes="base__abi,base__density"
+# and bundletool moved the values of many resources into the config splits, so a
+# base APK on its own has undefined ids in its own resource table and crashes at
+# launch (Resources$NotFoundException, drawable/photos_tabbar_photos_icon ->
+# res/prx.xml referencing @0x7f08090b and @0x7f080ac7, neither defined).
+# A system partition cannot carry config splits: android_app_import has no split
+# support in this Soong (build/soong/java/app_import.go:414 is a TODO), and
+# installing the base alone is refused with INSTALL_FAILED_MISSING_SPLIT.
+# So the set is copied into the image and installed as one multi-package session
+# on the first boot of a clean /data, which keeps Google's signature and lets
+# Play update the app afterwards. Full record: docs/projects/PHOTOS-APP.md.
+#
+# Source: APKPure direct XAPK endpoint for Google Photos 7.99.0.1007655401
+# (versionCode 52617542), file Google Photos_7.99.0.1007655401_APKPure.xapk,
+# 97,333,161 B, sha256 eabafe8393df95875757c5e503281cc8cc0520943fa5a2ce039973c9e648e401.
+# Only the splits this device needs are kept (abi arm64_v8a, density xxxhdpi - the
+# single density split the bundle ships - plus the `en` language split).
+# All four are signed by CN=Android OU=Android O=Google Inc.,
+# sha256 5aad2bee6db95d17e05a08d7d1e64c10a1511879154483916b6ae6c7fd9cb0c6.
+# They are gitignored (>100 MB single-file limit on GitHub), same as the other
+# large prebuilts here; the sha256 of each is the integrity record:
+#   com.google.android.apps.photos.apk 4ee9bac4ae531d81f77cc7c5865cb6552c3bdd3c858e51ed5606058dc54acbe9
+#   config.arm64_v8a.apk               4bc47b32c43630d128013bf897380ae0fef685901a48c28335224965289dd5b8
+#   config.xxxhdpi.apk                 dc6d250d55e6b88737fc451e08b7712e071aa3b7a8261a937ca330f1a38f1de3
+#   config.en.apk                      eef53e280f9f6b1ff8627252baf5ae2e52837d024a98ce1257b7e623de3e4009
+# The four APKs are NOT PRODUCT_COPY_FILES entries: build/make/core/Makefile:105
+# raises "Prebuilt apk found in PRODUCT_COPY_FILES ... use BUILD_PREBUILT instead"
+# for any %.apk destination. They ship as the four prebuilt_etc modules declared in
+# gphotos/Android.bp, which install to /system/etc/derp-gphotos/ with their own names.
+PRODUCT_PACKAGES += derp_gphotos_base derp_gphotos_split_arm64_v8a derp_gphotos_split_xxxhdpi derp_gphotos_split_en
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/derp-gphotos-install.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/derp-gphotos-install.sh \
+    $(LOCAL_PATH)/derp-gphotos-install.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/derp-gphotos-install.rc

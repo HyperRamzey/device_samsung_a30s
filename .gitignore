@@ -2,3 +2,8 @@
 # 738MB of GPhotos/AGC APKs: exceed GitHub 100MB/file limit, cannot be pushed.
 # Preserved at /root/backup/a30s_gphotos_prebuilt_20260925.tar ; Android.bp stays tracked.
 prebuilt/*.apk
+
+# Google Photos bundle parts (base + config splits) staged by PRODUCT_COPY_FILES.
+# ~73 MB total, over GitHub 100 MB per-file limit is not the issue but they are build
+# inputs downloaded from APKPure; sha256 of each is recorded in device.mk.
+gphotos/*.apk

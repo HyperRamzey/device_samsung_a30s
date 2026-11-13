@@ -4,7 +4,15 @@
     android:versionCode="1"
     android:versionName="1.0">
     <application android:hasCode="false" />
+    <!-- priority must stay above Glimpse's GlimpseFrameworksBaseOverlay, which is
+         static at priority 0 and overrides the same android:string/config_systemGallery.
+         config_systemGallery is the holder name in PermissionController's roles.xml
+         (role android.app.role.GALLERY, exclusive, user-scoped), so a tie between two
+         priority-0 static overlays decides which app is offered as "the gallery".
+         100 makes it Google Photos deterministically. Measured overlay list on device:
+         [x] org.lineageos.glimpse.frameworksbaseoverlay and
+         [x] com.samsung.android.ruler.googlephotos.overlay, both on target `android`. -->
     <overlay android:targetPackage="android"
         android:isStatic="true"
-        android:priority="0" />
+        android:priority="100" />
 </manifest>

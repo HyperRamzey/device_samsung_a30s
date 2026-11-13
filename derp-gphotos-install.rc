@@ -1,0 +1,22 @@
+# Google Photos first-boot install of the config-split APK set.
+#
+# Google Photos is bundle-only: the base APK requires base__abi and base__density
+# splits, so a single preinstalled APK has undefined resource ids and the app
+# crashes on launch (Resources$NotFoundException on drawable/photos_tabbar_photos_icon).
+# The splits are staged read-only under /system/etc/derp-gphotos by PRODUCT_COPY_FILES
+# and installed as one multi-package session on the first boot of a clean /data.
+# Rationale, measurements and the crash text: docs/projects/PHOTOS-APP.md
+#
+# Same shell-domain mechanism proven by agc_boot_update.rc: init is allowed to
+# transition to the shell domain via shell_exec (system/sepolicy/private/init.te
+# domain_trans(init, shell_exec, shell)), which is the uid+domain where
+# `pm install` was verified to work on this device.
+service derp_gphotos_install /system/bin/sh /system/bin/derp-gphotos-install.sh
+    user shell
+    group shell
+    seclabel u:r:shell:s0
+    oneshot
+    disabled
+
+on property:sys.boot_completed=1
+    start derp_gphotos_install

@@ -1,0 +1,59 @@
+// Google Photos bundle parts, staged read-only into the system image.
+//
+// Google Photos is published only as an Android App Bundle: the base APK declares
+//   android:requiredSplitTypes="base__abi,base__density"
+// and bundletool moved the values of many base-APK resources into the config
+// splits. A base APK alone therefore has undefined ids in its own resource table
+// and crashes on launch - measured on the flattened APK this device used to ship:
+// drawable/photos_tabbar_photos_icon (0x7f08090c) -> res/prx.xml, whose two
+// android:drawable items reference @0x7f08090b and @0x7f080ac7, and neither id is
+// defined in that APK's resources.arsc.
+//
+// They cannot be android_app_import modules: Soong has no split support for a
+// prebuilt APK (build/soong/java/app_import.go:414 is a TODO for
+// LOCAL_PACKAGE_SPLITS) and installing only the base is refused by the package
+// manager (INSTALL_FAILED_MISSING_SPLIT). They cannot ride in PRODUCT_COPY_FILES
+// either: build/make/core/Makefile:105 errors on any %.apk destination
+// ("Prebuilt apk found in PRODUCT_COPY_FILES ... use BUILD_PREBUILT instead").
+// prebuilt_etc is the sanctioned way to put a data file in /system/etc, so these
+// are plain read-only blobs under /system/etc/derp-gphotos/ and derp-gphotos-install.sh
+// (see device.mk) installs them as one multi-package `pm install` session on the
+// first boot of a clean /data. That keeps Google's signature, so Play can update
+// the app afterwards.
+//
+// Source and sha256 of every file: the comment block above the
+// derp-gphotos-install PRODUCT_COPY_FILES entries in device.mk.
+// Full decision record: docs/projects/PHOTOS-APP.md.
+
+prebuilt_etc {
+    name: "derp_gphotos_base",
+    src: "com.google.android.apps.photos.apk",
+    sub_dir: "derp-gphotos",
+    installable: true,
+}
+
+prebuilt_etc {
+    name: "derp_gphotos_split_arm64_v8a",
+    src: "config.arm64_v8a.apk",
+    sub_dir: "derp-gphotos",
+    installable: true,
+}
+
+// The bundle ships exactly one density split (xxxhdpi); this device is 280 dpi,
+// so xxxhdpi is the config.xxxhdpi split Play would select for it.
+prebuilt_etc {
+    name: "derp_gphotos_split_xxxhdpi",
+    src: "config.xxxhdpi.apk",
+    sub_dir: "derp-gphotos",
+    installable: true,
+}
+
+// Language split for the device locale. Optional for install (requiredSplitTypes
+// lists only base__abi and base__density) but it is what carries the english
+// strings, and at 1 MB it is cheaper than a gallery with placeholder text.
+prebuilt_etc {
+    name: "derp_gphotos_split_en",
+    src: "config.en.apk",
+    sub_dir: "derp-gphotos",
+    installable: true,
+}

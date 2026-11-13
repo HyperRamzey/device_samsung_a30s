@@ -9,16 +9,17 @@ android_app_import {
     },
 }
 
-android_app_import {
-    name: "GooglePhotos",
-    apk: "GooglePhotos.apk",
-    presigned: true,
-    preprocessed: true,
-    enforce_uses_libs: false,
-    dex_preopt: {
-        enabled: false,
-    },
-}
+// Google Photos is NOT an android_app_import here. It is bundle-only: the base APK
+// requires base__abi and base__density config splits, Soong cannot install config
+// splits for a prebuilt (build/soong/java/app_import.go:414 is a TODO), and a
+// base-only APK has undefined resource ids - the flattened APK that used to be
+// imported here (7.94.0.984908898, 152,994,692 B, and re-signed with the AOSP test
+// key a40da80a59d170caa950cf15c18c454d47a39b26989d8b640ecd745ba71bf5dc, which also
+// blocked Play updates) crashed every launch with
+//   Resources$NotFoundException: drawable/photos_tabbar_photos_icon (#0x7f08090c)
+// The base plus the splits this device needs are staged in the image instead and
+// installed as one multi-package session at first boot: see device.mk
+// (gphotos/ + derp-gphotos-install.{sh,rc}) and docs/projects/PHOTOS-APP.md.
 
 // KernelSU manager (BakaSU v4.2.0-rc3, versionCode 35171, package com.resukisu.resukisu).
 //
