@@ -20,13 +20,13 @@ android_app_import {
     },
 }
 
-// KernelSU manager (rsuntk/KernelSU v3.2.2-10-legacy, versionCode 32490).
+// KernelSU manager (BakaSU v4.2.0-rc3, versionCode 35171, package com.resukisu.resukisu).
 //
 // Shipped in /system/app so a data wipe cannot leave the device without the
-// manager: the kernel driver is built in (CONFIG_KSU, KSU_VERSION 32473) and the
-// APK is what turns it into usable root. `presigned` keeps the release
-// signature, and dex_preopt is off because the APK is precompiled and its size
-// does not justify a vdex in the system image.
+// manager: the kernel driver is built in (CONFIG_KSU, BakaSU v4.2.0-rc3,
+// KSU_VERSION 35171) and the APK is what turns it into usable root. `presigned`
+// keeps the release signature, and dex_preopt is off because the APK is
+// precompiled and its size does not justify a vdex in the system image.
 //
 // The APK itself is gitignored (prebuilt/*.apk). The download URL and sha256 are
 // recorded in device.mk next to the PRODUCT_PACKAGES entry.
@@ -56,7 +56,7 @@ android_app_import {
 android_app_import {
     name: "KernelSU",
     apk: "KernelSU.apk",
-    filename: "wffxxf.nclgit.cawxcw.apk",
+    filename: "com.resukisu.resukisu.apk",
     presigned: true,
     preprocessed: true,
     skip_preprocessed_apk_checks: true,

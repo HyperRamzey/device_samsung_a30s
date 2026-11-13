@@ -68,23 +68,26 @@ PRODUCT_PACKAGES += \
 
 # KernelSU manager, shipped as a system app.
 #
-# The kernel side is built into this ROM (CONFIG_KSU=y, KSU_VERSION 32473), but
-# the manager app was only ever installed by hand into /data, so formatting data
-# left the device with a root-capable kernel and no way to grant root. Naming it
-# here puts the APK in /system/app and it is present on the first boot after a
-# data wipe.
+# The kernel side is built into this ROM (CONFIG_KSU=y, BakaSU v4.2.0-rc3,
+# KSU_VERSION 35171), but the manager app was only ever installed by hand into
+# /data, so formatting data left the device with a root-capable kernel and no way
+# to grant root. Naming it here puts the APK in /system/app and it is present on
+# the first boot after a data wipe.
 #
 # prebuilt/KernelSU.apk is not tracked (prebuilt/*.apk is gitignored, like the
 # AGC and Google Photos APKs). Re-fetch it before a clean build:
 #
 #   curl -L -o prebuilt/KernelSU.apk \
-#     https://github.com/rsuntk/KernelSU/releases/download/v3.2.2-10-legacy/\
-#     KernelSU_v3.2.2-10-legacy-42-g915b4872_32490-release.apk
-#   sha256sum prebuilt/KernelSU.apk   # 78fe80980e65d30ced2a5f560680f8d6343d4443baee4c3bf1c82cbd6847147d
+#     https://github.com/Baka-SU/BakaSU/releases/download/v4.2.0-rc3/\
+#     ReSukiSU_v4.2.0-rc3_35171-arm64-v8a-release.apk
+#   sha256sum prebuilt/KernelSU.apk   # 25657bc449439687608fffa04b4b586de90fc405e3dc6217bd997fc71ba0a0a1
 #
-# v3.2.2-10-legacy (32490) is the release that reports "Working LEGACY,
-# Version: 32473" against this kernel; the package name inside the APK is the
-# randomized wffxxf.nclgit.cawxcw, which is what `pm list packages` will show.
+# v4.2.0-rc3 (35171) is the release whose kernel tag builds KSU_VERSION 35171.
+# The kernel computes 30000 + `git rev-list --count HEAD` + 700, and the rc3 tag
+# is 4471 commits, so kernel and manager are built from the same commit -- the
+# only pairing where the supercall protocol on both sides is known to match.
+# The package name inside the APK is com.resukisu.resukisu, which is what
+# `pm list packages` will show.
 PRODUCT_PACKAGES += \
     KernelSU
 
@@ -126,9 +129,35 @@ PRODUCT_PACKAGES += \
 # built system.img, never on the staged tree.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libadbroot.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libadbroot.so \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libandroidx.graphics.path.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libandroidx.graphics.path.so \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libdatastore_shared_counter.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libdatastore_shared_counter.so \
     $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libkernelsu.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libkernelsu.so \
-    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libksud.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libksud.so \
-    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libmagiskboot.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libmagiskboot.so
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libksud.so:$(TARGET_COPY_OUT_SYSTEM)/app/KernelSU/lib/arm64/libksud.so
+
+# The same file is ALSO installed as /system/bin/ksud. That path is what the kernel
+# executes: KernelSU's injected init rc runs KSUD_PATH at post-fs-data / services /
+# boot-completed, and the sucompat feature opens KSUD_PATH as the `su` binary. In this
+# tree KSUD_PATH is /system/bin/ksud (kernel/samsung/exynos7885/KernelSU/kernel/runtime/ksud.h)
+# because upstream's /data/adb/ksud is created by a kpimg payload appended to the boot
+# image, and this kernel is built into the ROM with `m bootimage` - no kpimg, so after a
+# data wipe nothing could ever create /data/adb/ksud and userspace would silently not run.
+# The copy below is read-only, version-pinned to the kernel (both are BakaSU v4.2.0-rc3),
+# and cannot be wiped. Executability comes from fs_config's /system/bin rule
+# (see docs/02-ROM-BUILD.md section 6), not from the source file's mode: verify on the
+# mounted image, never on the staged tree.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libksud.so:$(TARGET_COPY_OUT_SYSTEM)/bin/ksud
+
+# libmagiskboot.so is deliberately absent from PRODUCT_COPY_FILES. BakaSU's APK
+# does not ship one: its ksud does not repack boot images on this device, and
+# every image here is flashed from a host-side build. The stale 00755 entry for
+# it in system/core/libcutils/fs_config.cpp is therefore dead but harmless.
+#
+# The two androidx libraries are new with this APK and are loaded, not executed:
+# they sit beside the APK at 0644 so System.loadLibrary resolves them from
+# nativeLibraryDir, because the pristine system app never extracts them from the
+# compressed APK. libadbroot.so and libkernelsu.so are dlopen'd the same way.
+# Only libksud.so needs the executable bit, which fs_config.cpp sets.
 
 # /system/etc/Changelog.txt MUST be a declared output.
 #
