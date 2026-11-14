@@ -7,26 +7,18 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 
-# Bring-up: keep adb usable for diagnosis -- on the TESTING build only.
+# Security / ADB authentication policy (GitHub issues #2, #10):
 #
-# This was unconditional, which meant every public release carried ro.adb.secure=0
-# and a debuggable userdebug: any host with a cable got an unauthenticated shell on
-# a stranger's phone, with no prompt and no key. The same reasoning that removed
-# PRODUCT_ADB_KEYS for the public release (GitHub issue #2, note further down this
-# file) applies here, and was simply never applied to this line.
+# Leave WITH_ADB_INSECURE unset for ALL products (both release and testing) so
+# vendor/lineage/config/common.mk enforces ro.adb.secure=1 everywhere. A public
+# testing build with ro.adb.secure=0 + service.adb.root=1 would grant any USB host
+# a root shell with no RSA prompt.
 #
-# Lineage's common.mk sets ro.adb.secure=1 + PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG :=
-# true when WITH_ADB_INSECURE is unset (evaluated at inherit time), which yields
-# ro.debuggable=0 even in userdebug builds and authenticated adb. That is now the
-# release behaviour. DERP_TESTING is set by lineage_a30s_testing.mk before it
-# inherits this file, and that product also carries service.adb.root=1; see
-# device/samsung/a30s/lineage_a30s_testing.mk for what each property buys and for
-# the adbd/sepolicy citations behind it.
-#
-# Still set BEFORE the lineage inherit, because that is when common.mk reads it.
-ifeq ($(DERP_TESTING),1)
-WITH_ADB_INSECURE := true
-endif
+# For authenticated early root diagnostics, lineage_a30s_testing.mk sets
+# DERP_TESTING := 1 (gating zzz-early-adb.rc in exynos7885-common.mk), clears
+# PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG after inherit (so ro.debuggable=1 stays on
+# in userdebug), and sets service.adb.root=1. Testers pre-authorize their host
+# public key into /data/misc/adb/adb_keys from OrangeFox before first boot.
 
 # Mali-G71 MP2: background blur makes the notification shade janky (upstream
 # issue #7). Read by vendor/lineage/config/crdroid.mk, so set before the inherit.
