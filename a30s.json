@@ -4,15 +4,15 @@
             "maintainer": "HyperRamzey",
             "oem": "Samsung",
             "device": "Galaxy A30s",
-            "filename": "crDroidAndroid-16.0-20261019-a30s-v12.12.zip",
-            "download": "https://github.com/HyperRamzey/device_samsung_a30s/releases/download/0.7.9-hotfix2/crDroidAndroid-16.0-20261019-a30s-v12.12.zip",
-            "timestamp": 1792422000,
-            "sha256": "b20775a1306127cfc1245433b06283265caf409f4af9fea9d96da97888f2099b",
-            "size": 1803775942,
-            "version": "12.12",
+            "filename": "crDroidAndroid-16.0-20261114-a30s-v12.13.zip",
+            "download": "https://github.com/HyperRamzey/device_samsung_a30s/releases/download/0.8.0/crDroidAndroid-16.0-20261114-a30s-v12.13.zip",
+            "timestamp": 1794614400,
+            "sha256": "1bbf5c5e8dfeb7eb19d01e0ce6e98989eb5cbeff9a3d42b2c2cd8a5b62dfa1b8",
+            "size": 1808548644,
+            "version": "12.13",
             "os_sdk_level": 36,
             "buildtype": "Full",
-            "md5": "3647bb291dea06a900d08f3301378cca"
+            "md5": "0eca9848c92c2156fa491411c35a0de0"
         }
     ]
 }
