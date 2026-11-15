@@ -6,4 +6,5 @@
 # service.adb.root=1. See lineage_a30s_testing.mk for full details and key-injection steps.
 PRODUCT_MAKEFILES += \
     $(LOCAL_DIR)/lineage_a30s.mk \
-    $(LOCAL_DIR)/lineage_a30s_testing.mk
+    $(LOCAL_DIR)/lineage_a30s_testing.mk \
+    $(LOCAL_DIR)/lineage_a30s_gapps.mk
