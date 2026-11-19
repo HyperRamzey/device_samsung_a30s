@@ -17,9 +17,17 @@
     Overlay path matches the Updater module's resource dir by full source path:
         overlay-lineage/packages/apps/Updater/app/src/main/res/values/strings.xml
     (device.mk wires DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage)
+
+    updater_server_url deliberately does NOT live here any more. Which feed a device
+    may be updated from depends on which product it is running (clean, tester, or
+    GApps), and this directory is inherited by all three products - so while the URL
+    sat here, a GApps install was offered the clean zip and a tester build was offered
+    the release one. It now has exactly one definition per product, in
+        overlay-lineage-release/  overlay-lineage-testing/  overlay-lineage-gapps/
+    each added by the matching lineage_a30s*.mk. hm_mod/gate_ota_channel.sh asserts the
+    URL that actually ends up in the built Updater.apk.
 -->
 <resources>
-    <string name="updater_server_url" translatable="false">https://raw.githubusercontent.com/HyperRamzey/device_samsung_a30s/ota/a30s.json</string>
     <string name="menu_downloads_url" translatable="false">https://github.com/HyperRamzey/device_samsung_a30s/releases</string>
     <string name="menu_changelog_url" translatable="false">https://github.com/HyperRamzey/device_samsung_a30s/releases</string>
 </resources>

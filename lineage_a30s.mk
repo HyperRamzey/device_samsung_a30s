@@ -35,6 +35,14 @@ $(call inherit-product, device/samsung/a30s/device.mk)
 # Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := a30s
 PRODUCT_NAME := lineage_a30s
+
+# OTA: the clean build updates from a30s.json. Each of the three products adds exactly
+# one overlay directory carrying updater_server_url (release / testing / gapps), so the
+# feed can never be inherited from the wrong variant the way it was when the string sat
+# in the shared overlay-lineage/ -- see overlay-lineage-release/.../strings.xml and
+# hm_mod/gate_ota_channel.sh, which asserts the URL in the built Updater.apk.
+DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage-release
+
 PRODUCT_MODEL := SM-A307F
 PRODUCT_BRAND := samsung
 PRODUCT_MANUFACTURER := samsung

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    a30s CarrierConfig overlay (device tree addition).
+
+    Picked up as a STATIC overlay: device.mk sets
+    DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay, and Soong globs
+    <overlay root>/<module dir>/**  (build/soong/java/android_resources.go
+    overlayResourceGlob, reached from (*aapt).aapt2Flags) so this file
+    replaces packages/apps/CarrierConfig/res/xml/vendor.xml at link time.
+    It is NOT turned into an RRO here because PRODUCT_ENFORCE_RRO_TARGETS is
+    empty for this product (the a30s chain goes full_base -> generic_no_telephony
+    -> handheld_system and never reaches build/make/target/product/
+    generic_system.mk, which is the only place that sets it to '*'; confirmed by
+    zero auto_generated_rro_* packages in the shipped image). Same mechanism as
+    the SystemUI udfps_geometry.xml overlay in this directory, which ships.
+
+    Read after every bundled asset in packages/apps/CarrierConfig
+    (DefaultCarrierConfigService.loadConfig -> readConfigFromXml(R.xml.vendor)),
+    so a matching value here wins over both a bundled asset and the code default.
+
+    carrier_volte_available_bool:
+      AOSP hardcodes the default to false (CarrierConfigManager.sDefaults,
+      frameworks/base/telephony/java/android/telephony/CarrierConfigManager.java).
+      Carriers with no bundled asset - Irancell (43235, carrier id 1967), MCI
+      (43211, carrier id 1562), Tele2 RU (25020, carrier id 1028) among them -
+      are therefore hard-disabled and ImsManager.isVolteEnabledByPlatform()
+      never asks me.phh.ims to turn the MMTEL voice capability on, even though
+      SIP registration succeeds (observed on device: "Final MMTEL
+      capabilities=8", SMS only). With MMTEL voice off, every call falls back
+      to CS, where this modem leaves RIL_REQUEST_DIAL unanswered (GitHub issue
+      #11) - so the missing flag is what turns "no VoLTE" into "no calls at
+      all".
+      Of the bundled assets that set this key, all set true and none set false,
+      so a device-wide override cannot contradict a bundled decision - it only
+      replaces the AOSP false default.
+      PhhIms performs its own per-carrier gating at runtime; pinning platform
+      availability to true only stops the platform from hiding IMS voice.
+      Where the network/stack cannot deliver IMS voice, calls stay on CS.
+
+    Filter: device="a30s" - DefaultCarrierConfigService.checkFilters matches the
+    "device" attribute against Build.DEVICE (= ro.product.device = a30s,
+    case-insensitive), so the file is inert if this common tree is ever reused
+    for another device, and no mcc/mnc filter means every SIM benefits, not only
+    the carrier under test. (The SIM-less path uses vendor_no_sim.xml instead -
+    not shipped.)
+
+    GATE: hm_mod/gate_carrierconfig.sh asserts that the BUILT CarrierConfig.apk
+    still carries this key, because the failure mode is silent - an empty
+    res/xml/vendor.xml produces a bootable, otherwise-identical image whose only
+    symptom is that outgoing calls never connect (GitHub issue #11, v0.8.0).
+-->
+<carrier_config_list>
+    <carrier_config device="a30s">
+        <boolean name="carrier_volte_available_bool" value="true" />
+    </carrier_config>
+</carrier_config_list>

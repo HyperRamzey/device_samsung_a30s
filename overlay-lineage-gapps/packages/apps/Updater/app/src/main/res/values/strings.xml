@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    GApps product only: the MindTheGapps feed.
+
+    This is the OTA half of "GApps builds are a first-class variant". v0.8.0 shipped
+    as a GApps build (issues #11 and #14 were both filed against
+    crDroidAndroid-...-a30s_gapps-v12.13.zip), but with the feed URL in the shared
+    overlay every GApps device was polling a30s.json - the CLEAN feed. The Updater
+    would offer a zip whose package list has no GmsCore/Phonesky/SetupWizard, and
+    "Install" would replace a working GApps system with a clean one while looking
+    like a routine OTA. Neither crDroid nor Lineage can express that in the app:
+    UpdateChannel is RELEASE | TESTING (UserPreferencesRepository.kt:45) and a
+    user-selectable "GApps channel" would be a footgun anyway, because switching a
+    clean install to a GApps zip over OTA is not a supported transition - it is the
+    same wrong direction in the other hat.
+
+    So the feed follows the product. Product wiring:
+    lineage_a30s_gapps.mk adds $(LOCAL_PATH)/overlay-lineage-gapps.
+
+    The in-app Testing channel turns this into a30s_gapps_testing.json, which exists
+    only if a GApps tester feed is ever published; a 404 there is the honest answer,
+    not a silently wrong artifact.
+
+    Feed: hm_mod/make_ota_json.py -channel gapps; asserted against the built APK by
+    hm_mod/gate_ota_channel.sh.
+-->
+<resources>
+    <string name="updater_server_url" translatable="false">https://raw.githubusercontent.com/HyperRamzey/device_samsung_a30s/ota/a30s_gapps.json</string>
+</resources>

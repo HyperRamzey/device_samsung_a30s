@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Testing product only: the tester feed.
+
+    Before this, a lineage_a30s_testing install polled a30s.json - the RELEASE
+    feed - unless the tester happened to find Updater -> menu -> channel -> Testing
+    in the app. So the diagnostic build was offering to overwrite itself with the
+    release artifact, which has ro.debuggable=0 and no zzz-early-adb.rc, and the
+    tester's root adb disappeared on the next OTA with no warning.
+
+    Pointing the product at its own feed is safe against the app's channel logic:
+    UpdatesNetworkDataSource only appends _testing when the base does not already
+    end that way (patched in the same change), so leaving the in-app channel on
+    Testing does not produce a30s_testing_testing.json and a 404.
+
+    Product wiring: lineage_a30s_testing.mk adds $(LOCAL_PATH)/overlay-lineage-testing.
+    Feed: hm_mod/make_ota_json.py -channel testing; asserted by hm_mod/gate_ota_channel.sh.
+-->
+<resources>
+    <string name="updater_server_url" translatable="false">https://raw.githubusercontent.com/HyperRamzey/device_samsung_a30s/ota/a30s_testing.json</string>
+</resources>

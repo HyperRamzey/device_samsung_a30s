@@ -20,8 +20,62 @@
 <resources>
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has be tuned to be power efficient in DOZE and/or DOZE_SUSPEND
-         states. -->
-    <bool name="config_dozeAlwaysOnDisplayAvailable">true</bool>
+         states.
+
+         FALSE, and it must stay false, because this panel cannot doze (GitHub issue #13).
+         AOSP's own condition for setting this true is DOZE/DOZE_SUSPEND support, and this
+         device has none of the three things that make it real:
+           1. BOARD_USES_DOZEMODE is not set anywhere in device/samsung/{a30s,
+              exynos7885-common}, so hardware/samsung_slsi-linaro/config/hwc.mk:66 never
+              sets the exynos_hwc soong bool USES_DOZEMODE, so
+              ExynosDisplayFbInterface::isDozeModeAvailable() returns false
+              (graphics/base/libhwc2.1/display/ExynosDisplayFbInterface.h:79), so
+              exynos_getDozeSupport() reports no support and the composer never advertises
+              DisplayCapability.DOZE (hwc3/ComposerClient.cpp:195).
+           2. # CONFIG_EXYNOS_DOZE is not set - in arch/arm64/configs/
+              full/exynos7885-a30s_defconfig:2881 AND in the built
+              out/target/product/a30s/obj/KERNEL_OBJ/.config - so decon_doze.c and
+              dsim_doze.c are not even compiled into the kernel.
+           3. Not one panel driver in drivers/video/fbdev/exynos/dpu_7885/panels/ implements
+              the AOD entry path (grep enter_doze_mode|doze_init -> 0 files). dsim_doze.c is
+              generic DSI plumbing; the panel sequence that would drive the pixels in doze
+              does not exist for this panel. See changelog_v.08.md 21.3.
+
+         WHAT SETTING IT TRUE ACTUALLY DID (v0.8.0, measured by a tester on SM-A307FN 4 GB,
+         issue #13): SystemUI's doze_display_state_supported is false (frameworks/base/
+         packages/SystemUI/res/values/config.xml:200, and the doze.display.supported sysprop
+         is unset), so DozeScreenStatePreventingAdapter.wrapIfNeeded installs a wrapper whose
+         setDozeScreenState() rewrites STATE_DOZE to STATE_ON and STATE_DOZE_SUSPEND to
+         STATE_ON_SUSPEND (doze/DozeScreenStatePreventingAdapter.java:40-45). AOD therefore
+         never meant "low power panel": it meant the panel stayed powered at 0 brightness
+         with the display suspend blocker held, and the SoC could not suspend at all with the
+         screen apparently off. Measured: 2428 of 2436 mAh charged-as-screen-on over 11 h 38 m,
+         "screen off" time 5.9 s, /sys/class/backlight/panel/brightness=1 while dozing.
+         doze_always_on=0 makes dozeScreenState go to STATE_OFF and the device suspends.
+
+         WHY FALSE RATHER THAN "DEFAULT AOD TO OFF": AOD is not merely off by default here,
+         it is unreachable, and that has to be true for users who already turned it on too.
+         AmbientDisplayConfiguration.alwaysOnEnabledSetting() ANDs the stored
+         Settings.Secure.DOZE_ALWAYS_ON with alwaysOnAvailable(), which reads this resource
+         (core/java/android/hardware/display/AmbientDisplayConfiguration.java:303-308, 339-341,
+         374-376). So one OTA flips every existing install to AOD-off with no wipe and no
+         user action, whereas config_dozeAlwaysOnEnabled=false (the setting DEFAULT, used only
+         while the key is unset) would leave anyone who had toggled it on, and every Settings
+         entry point that hides itself when AOD is unavailable (qs/tiles/AODTile.java:106,
+         SystemServer.java:2920 AutoAODService) would hide the switch they would need.
+
+         The one bypass that resource does NOT cover is the "always-on while charging" key
+         (Settings.Secure.DOZE_ON_CHARGE), whose getter in AmbientDisplayConfiguration ignored
+         availability entirely; that is closed in the same fix, see
+         core/java/android/hardware/display/AmbientDisplayConfiguration.java
+         alwaysOnChargingEnabled().
+
+         To get real AOD on this board someday, all three numbered items above have to be
+         implemented (panel AOD sequence first - nothing downstream works without it), then
+         BOARD_USES_DOZEMODE + CONFIG_EXYNOS_DOZE, then doze_display_state_supported and a
+         non-zero config_screenBrightnessDoze. Until then do not re-enable this resource: a
+         DOZE request the composer rejects is not a no-op, it is a lit panel. -->
+    <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">true</bool>

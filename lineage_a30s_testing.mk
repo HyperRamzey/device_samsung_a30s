@@ -62,5 +62,13 @@ PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG :=
 
 PRODUCT_NAME := lineage_a30s_testing
 
+# OTA: the tester build updates from its own feed. With the URL in the shared
+# overlay-lineage/ this product polled a30s.json, i.e. the release artifact with
+# ro.debuggable=0 and no zzz-early-adb.rc, so one routine "Install" from Updater
+# would have silently de-tested the device. The double-suffix guard in
+# packages/apps/Updater keeps the in-app Testing channel from asking for
+# a30s_testing_testing.json.
+DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage-testing
+
 PRODUCT_PRODUCT_PROPERTIES += \
     service.adb.root=1

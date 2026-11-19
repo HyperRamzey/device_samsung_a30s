@@ -54,7 +54,7 @@ TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=$(shell pwd)/prebuilts/clang/host/linux
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 55574528
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2600468480
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 3040870400
 BOARD_CACHEIMAGE_PARTITION_SIZE := 209715200
 BOARD_VENDORIMAGE_PARTITION_SIZE   := 268435456
 
@@ -73,3 +73,15 @@ VENDOR_SECURITY_PATCH := 2021-11-01
 # cmd_list supports all three and A16 servicemanager rejects undeclared interfaces.
 DEVICE_MANIFEST_FILE := $(filter-out $(COMMON_PATH)/manifest_touch.xml,$(DEVICE_MANIFEST_FILE))
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest_touch_a30s.xml
+
+# GitHub issue #6 follow-up (2026-11-19): expose the zram/PSI/swaps counters to
+# adb shell on the TESTING product only.  SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS is a
+# board variable (soong reads it from the BoardConfigs, not from the product
+# .mk files), so the testing gate lives here; TARGET_PRODUCT is set before the
+# board config is evaluated, and hm_mod/build_variants.sh --check feeds the
+# same TARGET_PRODUCT to soong_ui, so the check sees exactly what the build
+# sees.  Release and gapps policy never contain that directory -- for them
+# sepolicy_neverallows passing is also proof of NON-exposure.
+ifeq ($(TARGET_PRODUCT),lineage_a30s_testing)
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += device/samsung/exynos7885-common/sepolicy-testing
+endif
