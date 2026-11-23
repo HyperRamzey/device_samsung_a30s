@@ -4,15 +4,15 @@
             "maintainer": "HyperRamzey",
             "oem": "Samsung",
             "device": "Galaxy A30s",
-            "filename": "crDroidAndroid-16.0-20261115-a30s_testing-v12.13-testing.zip",
-            "download": "https://github.com/HyperRamzey/device_samsung_a30s/releases/download/0.8.0/crDroidAndroid-16.0-20261115-a30s_testing-v12.13-testing.zip",
-            "timestamp": 1794700800,
-            "sha256": "ec869e1dffc2b0bbf6a8dbe009a67b3be333af0ebc97832e20821c0b504ba739",
-            "size": 1817768266,
+            "filename": "crDroidAndroid-16.0-20261120-a30s_testing-v12.13-testing.zip",
+            "download": "https://github.com/HyperRamzey/device_samsung_a30s/releases/download/0.8.1/crDroidAndroid-16.0-20261120-a30s_testing-v12.13-testing.zip",
+            "timestamp": 1795132800,
+            "sha256": "eff8f7fefad9e15efefb3c548696a040ae86179aea678fc39939fdf2109d8ae1",
+            "size": 1814393491,
             "version": "12.13",
             "os_sdk_level": 36,
             "buildtype": "Testing",
-            "md5": "41bf3e1e09497f6c38598967cf74aaf1"
+            "md5": "a9048f1fdd81221c18dfa4796c54a39c"
         }
     ]
 }
