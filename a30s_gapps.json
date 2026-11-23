@@ -1,0 +1,18 @@
+{
+    "response": [
+        {
+            "maintainer": "HyperRamzey",
+            "oem": "Samsung",
+            "device": "Galaxy A30s",
+            "filename": "crDroidAndroid-16.0-20261120-a30s_gapps-v12.13.zip",
+            "download": "https://github.com/HyperRamzey/device_samsung_a30s/releases/download/0.8.1/crDroidAndroid-16.0-20261120-a30s_gapps-v12.13.zip",
+            "timestamp": 1795132800,
+            "sha256": "8ea4b002c2110a8e0274fc39787a3d72c924ed798db15f9081b1c1636c6fd6f1",
+            "size": 2142509709,
+            "version": "12.13",
+            "os_sdk_level": 36,
+            "buildtype": "GApps",
+            "md5": "b325f671aff025e30201625a86225355"
+        }
+    ]
+}
