@@ -15,6 +15,37 @@ $(call inherit-product, vendor/samsung/a30s/a30s-vendor.mk)
 # Inherit dalvik config
 $(call inherit-product, frameworks/native/build/phone-xhdpi-4096-dalvik-heap.mk)
 
+# ---- aconfig flag value that fixes device_samsung_a30s#11.3 --------------------------
+#
+# android.app:system_dialer_phone_call_fgs_grant is ENABLED for this platform. Its absence
+# from bp4a is why the preloaded AOSP Dialer's phone-call foreground service was denied and
+# crash-looped on the GApps product, and why the flag was not even present in the installed
+# build's /system/etc/aconfig_flags.pb (0 rows in `aflags list`).
+#
+# WHERE THE VALUE LIVES: vendor/lineage/release/aconfig/bp4a/android.app/
+# (system_dialer_phone_call_fgs_grant.textproto + Android.bp), which is the ONE place this
+# could be put — measured, three attempts:
+#   1. `RELEASE_ACONFIG_VALUE_SETS += ...` here does not work: release flags from the
+#      release-config varmk are readonly in make
+#      ("device.mk: cannot assign to readonly variable: RELEASE_ACONFIG_VALUE_SETS").
+#   2. A device-owned release map (device/samsung/a30s/release/ + a self-contained
+#      aconfig_value_set) works at the release-config layer but fails in soong:
+#      device/samsung/a30s/Android.bp declares soong_namespace{} (needed —
+#      PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH) references it), so a value set defined
+#      here is invisible to the default-namespace aconfig_declarations modules that every
+#      release-config value set is wired into
+#      ("powerhal_flags-aconfig" depends on undefined module "aconfig_value_set-a30s-bp4a").
+#      //visibility:public does not cross a namespace boundary; only an import does, and the
+#      default namespace has no file in which to declare one. vendor/samsung/a30s is
+#      namespaced too (auto-generated Android.bp), so it cannot host it either.
+#   3. Lineage's own release dir is the default namespace and ALREADY has a wired value set
+#      (aconfig_value_set-lineage-bp4a, RELEASE_ACONFIG_VALUE_SETS in the generated varmk).
+#      Its srcs glob is "*/Android.bp", so one new package dir there is picked up with no
+#      edit to any tracked file. That is where the value is.
+#
+# Undo: delete vendor/lineage/release/aconfig/bp4a/android.app/ and the flag is gone from
+# every a30s product again (the crash loop returns on the GApps build).
+
 # lmkd thresholds must be re-asserted in the PRODUCT property space.
 #
 # MEASURED: with the lmkd block only in PRODUCT_PROPERTY_OVERRIDES (which this
@@ -147,6 +178,22 @@ PRODUCT_COPY_FILES += \
 # mounted image, never on the staged tree.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/kernelsu-libs/arm64/libksud.so:$(TARGET_COPY_OUT_SYSTEM)/bin/ksud
+
+# Empty system adb key store, so /adb_keys resolves.
+# system/core/rootdir/create_root_structure.mk creates the root symlink
+# unconditionally (ln -sf /product/etc/security/adb_keys /adb_keys), while 71cf42c
+# deliberately stopped shipping the build-host key (PRODUCT_ADB_KEYS stays unset,
+# see lineage_a30s.mk). The combination left /adb_keys dangling -- reported as
+# cosmetic in device_samsung_a30s#8 bug 7, but a dangling symlink also makes
+# init's `restorecon /adb_keys` and every "is adb_keys present" check answer with
+# ENOENT instead of a truthful empty store.
+# An *empty* file authorizes nothing: adbd loads /adb_keys and /data/misc/adb/adb_keys
+# independently and simply gets no extra keys from the first one, so the user's own
+# authorizations (zzz-early-adb.rc owns the /data copy) are untouched. Restoring the
+# AOSP adb_keys module instead would re-introduce the shipped build-host key, which
+# is the bug 71cf42c fixed.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/adb_keys_empty:$(TARGET_COPY_OUT_PRODUCT)/etc/security/adb_keys
 
 # libmagiskboot.so is deliberately absent from PRODUCT_COPY_FILES. BakaSU's APK
 # does not ship one: its ksud does not repack boot images on this device, and
